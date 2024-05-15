@@ -122,7 +122,7 @@ void AMotionMatchingCharacter::BeginPlay()
 	//PoseTest();
 	//PoseTestByPostion(0);
 	
-	PoseTest2(300); //우선은 프레임 0의 포즈 출력해 봄
+	PoseTest2(1200); //우선은 프레임 0의 포즈 출력해 봄
 
 
 	//DataBase Log Test
@@ -294,7 +294,7 @@ void AMotionMatchingCharacter::PoseTest2(int frameindex) {
 	float pi = 3.141592;
 
 	int scale = (180/pi);
-	int scale = 1;
+	//int scale = 1;
 
 	//관절의 개수
 	int JointsNum = JointsNames2.Num();
@@ -313,14 +313,12 @@ void AMotionMatchingCharacter::PoseTest2(int frameindex) {
 		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].y * (-1), curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].x * (-1), curr_bone_rotations.data[i].w * scale) * (-1));
 
 		//현재로서는 가장 근접
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x, curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].x * (-1), curr_bone_rotations.data[i].w * scale) * (-1));
+		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].w * scale) * (1));
 
-		JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].z, curr_bone_rotations.data[i].y * (-1), curr_bone_rotations.data[i].x, curr_bone_rotations.data[i].w * scale));
-
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].y, curr_bone_rotations.data[i].x, curr_bone_rotations.data[i].w * scale * (1)));
+		JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (-1), curr_bone_rotations.data[i].w * scale) * (1));
 
 
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * scale, curr_bone_rotations.data[i].y * scale, curr_bone_rotations.data[i].z * scale, curr_bone_rotations.data[i].w));
+
 	}
 
 
