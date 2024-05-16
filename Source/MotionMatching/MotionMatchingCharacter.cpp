@@ -105,7 +105,7 @@ void AMotionMatchingCharacter::BeginPlay()
 	UE_LOG(LogTemp, Log, TEXT("MyFloat value: %f, %f"), vec_result.x, vec_result.y);
 
 
-	LoadBinaryFile("E:/Unreal_engine_projects/MotionMatching/database.bin");
+	//LoadBinaryFile("E:/Unreal_engine_projects/MotionMatching/database.bin");
 
 	//---------------------------------------------------
 	
@@ -120,13 +120,14 @@ void AMotionMatchingCharacter::BeginPlay()
 
 	//PoseTest
 	//PoseTest();
-	//PoseTestByPostion(0);
-	
-	PoseTest2(1200); //우선은 프레임 0의 포즈 출력해 봄
-
+	PoseTestByPostion(0);
+	//PoseTest2(300); //우선은 프레임 0의 포즈 출력해 봄
 
 	//DataBase Log Test
 	DataBaseLog();
+
+	//Character.bin load test
+	CharacterLoadTest();
 
 }
 
@@ -293,8 +294,8 @@ void AMotionMatchingCharacter::PoseTest2(int frameindex) {
 
 	float pi = 3.141592;
 
-	int scale = (180/pi);
-	//int scale = 1;
+	//int scale = (180/pi);
+	int scale = 1;
 
 	//관절의 개수
 	int JointsNum = JointsNames2.Num();
@@ -313,12 +314,16 @@ void AMotionMatchingCharacter::PoseTest2(int frameindex) {
 		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].y * (-1), curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].x * (-1), curr_bone_rotations.data[i].w * scale) * (-1));
 
 		//현재로서는 가장 근접
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].w * scale) * (1));
+		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].w * scale* (1)));
 
-		JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (-1), curr_bone_rotations.data[i].w * scale) * (1));
+		
+		//acos(curr_bone_rotations.data[i].w) * 2 * (180 / pi)
 
+		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].w * scale * (1)) );
 
+		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), acos(curr_bone_rotations.data[i].w) * 2 * (180 / pi)));
 
+		JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), acos(curr_bone_rotations.data[i].w) * 2));
 	}
 
 
@@ -354,7 +359,9 @@ void AMotionMatchingCharacter::PoseTestByPostion(int frameindex) {
 	//현재 프레임의 position 데이터 저장 //curr_bone_rotations.size
 	TArray<FVector> JointsVector;
 	for (int i = 0; i < JointsNum; i++) {
-		JointsVector.Emplace(FVector(curr_bone_positions.data[i].x * scale, curr_bone_positions.data[i].y * scale, curr_bone_positions.data[i].z * scale));
+		//JointsVector.Emplace(FVector(curr_bone_positions.data[i].x * scale, curr_bone_positions.data[i].y * scale, curr_bone_positions.data[i].z * scale));
+
+		JointsVector.Emplace(FVector(curr_bone_positions.data[i].x * scale, curr_bone_positions.data[i].z * scale, curr_bone_positions.data[i].x * scale));
 	}
 
 	//Set Pose
@@ -448,5 +455,81 @@ void AMotionMatchingCharacter::SaveBasicVectors() {
 	for (int i = 1; i < JointsNames2.Num(); i++) {
 		BasicCharatorVector.Emplace(GetMesh()->GetBoneLocationByName(FName(JointsNames2[i]), EBoneSpaces::ComponentSpace));
 		//BasicCharatorRotator.Emplace(GetMesh()->GetBoneRotationByName(FName(JointsNames2[i]), EBoneSpaces::WorldSpace));
+	}
+}
+
+void AMotionMatchingCharacter::CharacterLoadTest() {
+
+	character_load(character_data, "E:/Unreal_engine_projects/MotionMatching/character.bin");
+
+	UE_LOG(LogTemp, Log, TEXT("positions length: %d"), character_data.positions.size);
+	UE_LOG(LogTemp, Log, TEXT("bone_rest_positions length: %d"), character_data.bone_rest_positions.size);
+	UE_LOG(LogTemp, Log, TEXT("bone_rest_rotations length: %d"), character_data.bone_rest_rotations.size);
+
+	//character_bone_rest_rotations 출력
+	for (int i = 0; i < character_data.bone_rest_rotations.size; i++) {
+		UE_LOG(LogTemp, Log, TEXT("character_bone_rest_rotations:"));
+		UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f, w: %f"), character_data.bone_rest_rotations.data[i].x, character_data.bone_rest_rotations.data[i].y, character_data.bone_rest_rotations.data[i].z, character_data.bone_rest_rotations.data[i].w);
+	}
+	////character_bone_rest_positions 출력
+	for (int i = 0; i < character_data.bone_rest_positions.size; i++) {
+		UE_LOG(LogTemp, Log, TEXT("character_bone_rest_positions:"));
+		UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), character_data.bone_rest_positions.data[i].x, character_data.bone_rest_positions.data[i].y, character_data.bone_rest_positions.data[i].z);
+	}
+
+}
+
+void AMotionMatchingCharacter::SetCharacterPositionRest() {
+
+	int scale = 100;
+
+	//관절의 개수
+	int JointsNum = JointsNames2.Num();
+
+	array1d<vec3> curr_bone_positions = character_data.bone_rest_positions;
+
+	TArray<FVector> JointsVector;
+	for (int i = 0; i < JointsNum; i++) {
+		JointsVector.Emplace(FVector(curr_bone_positions.data[i].x * scale, curr_bone_positions.data[i].z * scale, curr_bone_positions.data[i].y * scale));
+	}
+
+	//Set Pose
+	//GetMesh()->SetBoneLocationByName(FName(JointsNames2[0]), JointsVector[0] + BasicCharatorVector[0], EBoneSpaces::WorldSpace);
+	GetMesh()->SetBoneLocationByName(FName(JointsNames2[0]), JointsVector[0], EBoneSpaces::WorldSpace);
+
+	for (int i = 1; i < JointsNum; i++) {
+		//FVector Position = JointsVector[i] + BasicCharatorVector[i]; //basic에 position 더한 값
+		FVector Position = JointsVector[i];
+		GetMesh()->SetBoneLocationByName(FName(JointsNames2[i]), Position, EBoneSpaces::ComponentSpace);
+	}
+}
+
+void AMotionMatchingCharacter::SetCharacterRotationRest() {
+
+	float pi = 3.141592;
+
+	//int scale = (180/pi);
+	int scale = 1;
+
+	//관절의 개수
+	int JointsNum = JointsNames2.Num();
+
+	array1d<quat> curr_bone_rotations = character_data.bone_rest_rotations;
+
+	TArray<FQuat> JointsQuat;
+
+	for (int i = 0; i < JointsNum; i++) {
+		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), acos(curr_bone_rotations.data[i].w) * 2));
+		JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].w));
+	}
+
+	//Set pose
+	//GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator() + BasicCharatorRotator[0], EBoneSpaces::WorldSpace);
+	GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator(), EBoneSpaces::WorldSpace);
+
+	for (int i = 1; i < JointsNum; i++) {
+		//FRotator Rotation = JointsQuat[i].Rotator() + BasicCharatorRotator[i];
+		FRotator Rotation = JointsQuat[i].Rotator();
+		GetMesh()->SetBoneRotationByName(FName(JointsNames2[i]), Rotation, EBoneSpaces::ComponentSpace);
 	}
 }

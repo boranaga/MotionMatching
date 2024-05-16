@@ -186,6 +186,19 @@ public: //Motion Matching 관련
 	UFUNCTION()
 	void DataBaseLog();
 
+
+public: //character.bin load test
+	character character_data;
+
+	UFUNCTION()
+	void CharacterLoadTest();
+
+	UFUNCTION()
+	void SetCharacterPositionRest(); //캐릭터의 position을 bone_rest_positions으로 설정
+
+	UFUNCTION()
+	void SetCharacterRotationRest(); //캐릭터의 rotation을 bone_rest_rotations으로 설정
+
 };
 
 

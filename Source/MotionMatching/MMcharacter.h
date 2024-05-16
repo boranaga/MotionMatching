@@ -58,7 +58,7 @@ enum Bones
 
 struct character
 {
-    array1d<vec3> positions;
+    array1d<vec3> positions; //size: 5002
     array1d<vec3> normals;
     array1d<vec2> texcoords;
     array1d<unsigned short> triangles;
@@ -66,8 +66,8 @@ struct character
     array2d<float> bone_weights;
     array2d<unsigned short> bone_indices;
 
-    array1d<vec3> bone_rest_positions;
-    array1d<quat> bone_rest_rotations;
+    array1d<vec3> bone_rest_positions; //size: 23
+    array1d<quat> bone_rest_rotations; //size: 23
 };
 
 
