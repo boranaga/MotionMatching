@@ -576,8 +576,6 @@ void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 		inertialize_blending_halflife,
 		0.0f);
 
-
-
 }
 
 
@@ -600,29 +598,16 @@ void AMotionMatchingCharacter::DataBaseLog() {
 
 	int frame_index = db.range_starts(0);
 
-	array1d<vec3> curr_bone_positions = db.bone_positions(frame_index);
-	array1d<vec3> curr_bone_velocities = db.bone_velocities(frame_index);
-	array1d<quat> curr_bone_rotations = db.bone_rotations(frame_index);
-
-
-	//UE_LOG(LogTemp, Log, TEXT("w: %f"), curr_bone_rotations(0));
-
-
-	//curr_bone_rotations.data[0].w
-
-
-	//db.bone_rotations.data[300];
-
-
+	array1d<vec3> bone_positions = db.bone_positions(frame_index);
+	array1d<vec3> bone_velocities = db.bone_velocities(frame_index);
+	array1d<quat> bone_rotations = db.bone_rotations(frame_index);
 
 	//db에 data가 잘 저장되었는지 Log 출력으로 확인
-	UE_LOG(LogTemp, Log, TEXT("Joints Num: %d"), curr_bone_rotations.size);
+	UE_LOG(LogTemp, Log, TEXT("Joints Num: %d"), bone_rotations.size);
 
-	for (int i = 0; i < curr_bone_rotations.size; i++) {
+	for (int i = 0; i < bone_rotations.size; i++) {
 
-		//db.bone_rotations.rows;
-
-		UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f, w: %f"), curr_bone_rotations.data[i].x, curr_bone_rotations.data[i].y, curr_bone_rotations.data[i].z, curr_bone_rotations.data[i].w);
+		UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f, w: %f"), bone_rotations.data[i].x, bone_rotations.data[i].y, bone_rotations.data[i].z, bone_rotations.data[i].w);
 	}
 
 }
@@ -643,7 +628,6 @@ void AMotionMatchingCharacter::SaveBasicRotators() {
 		UE_LOG(LogTemp, Log, TEXT("Roll: %f, Pitch: %f, Yaw: %f"), BasicCharatorRotator[i].Roll, BasicCharatorRotator[i].Pitch, BasicCharatorRotator[i].Yaw);
 	}
 }
-
 
 
 void AMotionMatchingCharacter::SaveBasicVectors() {
