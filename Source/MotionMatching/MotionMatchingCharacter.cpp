@@ -124,7 +124,7 @@ void AMotionMatchingCharacter::BeginPlay()
 	//PoseTest
 	//PoseTest();
 	//PoseTestByPostion(0);
-	//PoseTest2(300); //우선은 프레임 0의 포즈 출력해 봄
+	//PoseTest2(0); //우선은 프레임 0의 포즈 출력해 봄
 
 	//SetCharacterPositionRest();
 	SetCharacterRotationRest();
@@ -328,24 +328,24 @@ void AMotionMatchingCharacter::PoseTest2(int frameindex) {
 
 		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), acos(curr_bone_rotations.data[i].w) * 2 * (180 / pi)));
 
-		JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), acos(curr_bone_rotations.data[i].w) * 2));
+		JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].w));
 	}
 
 
 	//Set pose
 	//GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator() + BasicCharatorRotator[0], EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator() + BasicCharatorRotator[0], EBoneSpaces::WorldSpace); //basic에 rotation 더한 값
+	//GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator() + BasicCharatorRotator[0], EBoneSpaces::WorldSpace); //basic에 rotation 더한 값
+
+	GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator(), EBoneSpaces::WorldSpace);
 
 	//GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator(), EBoneSpaces::WorldSpace); //그냥 rotation만 적용 시키는 것
 
 	for (int i = 1; i < JointsNum; i++) {
 
-		FRotator Rotation = JointsQuat[i].Rotator() + BasicCharatorRotator[i];
-		
-		GetMesh()->SetBoneRotationByName(FName(JointsNames2[i]), Rotation, EBoneSpaces::ComponentSpace); //basic에 rotation 더한 값
-		//GetMesh()->SetBoneRotationByName(FName(JointsNames2[i]), Rotation, EBoneSpaces::WorldSpace);
+		//FRotator Rotation = JointsQuat[i].Rotator() + BasicCharatorRotator[i];
+		FRotator Rotation = JointsQuat[i].Rotator();
 
-		//GetMesh()->SetBoneRotationByName(FName(JointsNames2[i]), JointsQuat[i].Rotator(), EBoneSpaces::ComponentSpace); //그냥 rotation만 적용 시키는 것
+		GetMesh()->SetBoneRotationByName(FName(JointsNames2[i]), Rotation, EBoneSpaces::ComponentSpace);
 
 	}
 }
@@ -524,17 +524,15 @@ void AMotionMatchingCharacter::SetCharacterRotationRest() {
 	TArray<FQuat> JointsQuat;
 
 	for (int i = 0; i < JointsNum; i++) {
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), acos(curr_bone_rotations.data[i].w) * 2 * scale   ));
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (-1), curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].y * (-1), curr_bone_rotations.data[i].w));
 
+		//언리얼에 맞게 좌표계를 변환해줌
 		JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].w));
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].w * scale));
+
 	}
 
 	//Set pose
-	//GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator() + BasicCharatorRotator[0], EBoneSpaces::WorldSpace);
-	//GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator(), EBoneSpaces::WorldSpace);
-	GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator(), EBoneSpaces::ComponentSpace);
+	FQuat StandQuat(0, 1, 0, 90);
+	GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator(), EBoneSpaces::WorldSpace);
 
 	for (int i = 1; i < JointsNum; i++) {
 		//FRotator Rotation = JointsQuat[i].Rotator() + BasicCharatorRotator[i];
@@ -542,4 +540,8 @@ void AMotionMatchingCharacter::SetCharacterRotationRest() {
 		GetMesh()->SetBoneRotationByName(FName(JointsNames2[i]), Rotation, EBoneSpaces::ComponentSpace);
 		//GetMesh()->SetBoneRotationByName(FName(JointsNames2[i]), Rotation, EBoneSpaces::WorldSpace);
 	}
+
+	//Mesh를 world y축을 기준으로 90도 회전시켜서 세움
+	GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), GetMesh()->GetBoneRotationByName(FName(JointsNames2[0]), EBoneSpaces::WorldSpace) + StandQuat.Rotator(), EBoneSpaces::WorldSpace);
+
 }
