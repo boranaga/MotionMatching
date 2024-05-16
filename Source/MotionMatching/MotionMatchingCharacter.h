@@ -57,36 +57,37 @@ class AMotionMatchingCharacter : public ACharacter
 	UInputAction* LookAction;
 
 
+public:
+	AMotionMatchingCharacter();
+	
+
+protected:
+
+	/** Called for movement input */
+	void Move(const FInputActionValue& Value);
+
+	/** Called for looking input */
+	void Look(const FInputActionValue& Value);
+			
+
+protected:
+	// APawn interface
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	// To add mapping context
+	virtual void BeginPlay();
+
+public:
+	/** Returns CameraBoom subobject **/
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	/** Returns FollowCamera subobject **/
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+
 protected: //Motion Matching 관련 variables
 
 	//스켈레톤의 각 Joint 이름을 저장한 배열
-	const TArray<std::string> JointsNames = {
-		"Root",
-		"Hips",
-		"LeftUpLeg",
-		"LeftLeg",
-		"LeftFoot",
-		"LeftToe",
-		"RightUpLeg",
-		"RightLeg",
-		"RightFoot",
-		"RightToe",
-		"Spine",
-		"Spine1",
-		"Spine2",
-		"Neck",
-		"Head",
-		"LeftShoulder",
-		"LeftArm",
-		"LeftForeArm",
-		"LeftHand",
-		"RightShoulder",
-		"RightArm",
-		"RightForeArm",
-		"RightHand"
-	};
-
-	const TArray<FString> JointsNames2 = {
+	const TArray<FString> JointsNames = {
 		TEXT("Root"),
 		TEXT("Hips"),
 		TEXT("LeftUpLeg"),
@@ -120,45 +121,153 @@ protected: //Motion Matching 관련 variables
 
 
 	// Load Animation Data and build Matching Database
-	database db; //database.bin과 features.bin 모두 db에 저장됨
+	database DB; //database.bin과 features.bin 모두 DB에 저장됨
 
 	//feature를 저장할 때 사용되는 weight의 값
-	float feature_weight_foot_position = 0.75f;
-	float feature_weight_foot_velocity = 1.0f;
-	float feature_weight_hip_velocity = 1.0f;
-	float feature_weight_trajectory_positions = 1.0f;
-	float feature_weight_trajectory_directions = 1.5f;
-
+	float Feature_weight_foot_position = 0.75f;
+	float Feature_weight_foot_velocity = 1.0f;
+	float Feature_weight_hip_velocity = 1.0f;
+	float Feature_weight_trajectory_positions = 1.0f;
+	float Feature_weight_trajectory_directions = 1.5f;
 
 	// Character
-	character character_data;
+	character Character_data;
+
+	// Pose & Inertializer Data
+	int Frame_index;
+	float Inertialize_blending_halflife = 0.1f;
+
+	array1d<vec3> Curr_bone_positions;
+	array1d<vec3> Curr_bone_velocities;
+	array1d<quat> Curr_bone_rotations;
+	array1d<vec3> Curr_bone_angular_velocities;
+	array1d<bool> Curr_bone_contacts;
+
+	array1d<vec3> Trns_bone_positions;
+	array1d<vec3> Trns_bone_velocities;
+	array1d<quat> Trns_bone_rotations;
+	array1d<vec3> Trns_bone_angular_velocities;
+	array1d<bool> Trns_bone_contacts;
+
+	array1d<vec3> Bone_positions;
+	array1d<vec3> Bone_velocities;
+	array1d<quat> Bone_rotations;
+	array1d<vec3> Bone_angular_velocities;
+
+	array1d<vec3> Bone_offset_positions;
+	array1d<vec3> Bone_offset_velocities;
+	array1d<quat> Bone_offset_rotations;
+	array1d<vec3> Bone_offset_angular_velocities;
+
+	array1d<vec3> Global_bone_positions;
+	array1d<vec3> Global_bone_velocities;
+	array1d<quat> Global_bone_rotations;
+	array1d<vec3> Global_bone_angular_velocities;
+	array1d<bool> Global_bone_computed;
+
+	vec3 Transition_src_position;
+	quat Transition_src_rotation;
+	vec3 Transition_dst_position;
+	quat Transition_dst_rotation;
+
+	// Trajectory & Gameplay Data
+
+	float Search_time = 0.1f;
+	float Search_timer;
+	float Force_search_timer;
+
+	vec3 Desired_velocity;
+	vec3 Desired_velocity_change_curr;
+	vec3 Desired_velocity_change_prev;
+	float Desired_velocity_change_threshold = 50.0;
+
+	quat Desired_rotation;
+	vec3 Desired_rotation_change_curr;
+	vec3 Desired_rotation_change_prev;
+	float Desired_rotation_change_threshold = 50.0;
+
+	float Desired_gait = 0.0f;
+	float Desired_gait_velocity = 0.0f;
+
+	vec3 Simulation_position;
+	vec3 Simulation_velocity;
+	vec3 Simulation_acceleration;
+	quat Simulation_rotation;
+	vec3 Simulation_angular_velocity;
+
+	float Simulation_velocity_halflife = 0.27f; //이 값들이 이 후 게임 로직 중에 수정되는지 아닌지 확인해 봐야함(수정된다면 여기서 값을 정의 하는것이 좋지 않을 듯함)
+	float Simulation_rotation_halflife = 0.27f;
 
 
-public:
-	AMotionMatchingCharacter();
-	
+	// All speeds in m/s
+	float Simulation_run_fwrd_speed = 4.0f;
+	float Simulation_run_side_speed = 3.0f;
+	float Simulation_run_back_speed = 2.5f;
 
-protected:
+	float Simulation_walk_fwrd_speed = 1.75f;
+	float Simulation_walk_side_speed = 1.5f;
+	float Simulation_walk_back_speed = 1.25f;
 
-	/** Called for movement input */
-	void Move(const FInputActionValue& Value);
+	array1d<vec3> Trajectory_desired_velocities = array1d<vec3>(4);
+	array1d<quat> Trajectory_desired_rotations = array1d<quat>(4);
+	array1d<vec3> Trajectory_positions = array1d<vec3>(4);
+	array1d<vec3> Trajectory_velocities = array1d<vec3>(4);
+	array1d<vec3> Trajectory_accelerations = array1d<vec3>(4);
+	array1d<quat> Trajectory_rotations = array1d<quat>(4);
+	array1d<vec3> Trajectory_angular_velocities = array1d<vec3>(4);
 
-	/** Called for looking input */
-	void Look(const FInputActionValue& Value);
-			
+	// Synchronization
+	bool Synchronization_enabled;
+	float Synchronization_data_factor = 1.0f;
 
-protected:
-	// APawn interface
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-	// To add mapping context
-	virtual void BeginPlay();
+	// Adjustment
+	bool Adjustment_enabled;
+	bool Adjustment_by_velocity_enabled;
+	float Adjustment_position_halflife = 0.1f;
+	float Adjustment_rotation_halflife = 0.2f;
+	float Adjustment_position_max_ratio = 0.5f;
+	float Adjustment_rotation_max_ratio = 0.5f;
 
-public:
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	// Clamping
+	bool Clamping_enabled;
+	float Clamping_max_distance = 0.15f;
+	float Clamping_max_angle = 0.5f * PIf;
+
+	// IK
+	bool Ik_enabled;
+	float Ik_max_length_buffer = 0.015f;
+	float Ik_foot_height = 0.02f;
+	float Ik_toe_length = 0.15f;
+	float Ik_unlock_radius = 0.2f;
+	float Ik_blending_halflife = 0.1f;
+
+	// Contact and Foot Locking data
+	array1d<int> Contact_bones = array1d<int>(2);
+
+	array1d<bool> Contact_states = array1d<bool>(Contact_bones.size);
+	array1d<bool> Contact_locks = array1d<bool>(Contact_bones.size);
+	array1d<vec3> Contact_positions = array1d<vec3>(Contact_bones.size);
+	array1d<vec3> Contact_velocities = array1d<vec3>(Contact_bones.size);
+	array1d<vec3> Contact_points = array1d<vec3>(Contact_bones.size);
+	array1d<vec3> Contact_targets = array1d<vec3>(Contact_bones.size);
+	array1d<vec3> Contact_offset_positions = array1d<vec3>(Contact_bones.size);
+	array1d<vec3> Contact_offset_velocities = array1d<vec3>(Contact_bones.size);
+
+	array1d<vec3> Adjusted_bone_positions;
+	array1d<quat> Adjusted_bone_rotations;
+
+
+	// Learned Motion Matching
+	bool LMM_enabled;
+
+	nnet Decompressor, Stepper, Projector;
+	nnet_evaluation Decompressor_evaluation, Stepper_evaluation, Projector_evaluation;
+
+	array1d<float> Features_proj;
+	array1d<float> Features_curr;
+	array1d<float> Latent_proj = array1d<float>(32);
+	array1d<float> Latent_curr = array1d<float>(32);
+
 
 
 public: //poseblemesh 관련
@@ -201,7 +310,6 @@ public: //Motion Matching 관련
 
 	//-------------------------------------------------------------------
 	//오렌지 덕의 controller.cpp에 정의되어 있는 함수들
-
 	void inertialize_pose_reset(
 		slice1d<vec3> bone_offset_positions,
 		slice1d<vec3> bone_offset_velocities,
@@ -236,6 +344,19 @@ public: //Motion Matching 관련
 		const float dt);
 
 
+	void contact_reset(
+		bool& contact_state,
+		bool& contact_lock,
+		vec3& contact_position,
+		vec3& contact_velocity,
+		vec3& contact_point,
+		vec3& contact_target,
+		vec3& contact_offset_position,
+		vec3& contact_offset_velocity,
+		const vec3 input_contact_position,
+		const vec3 input_contact_velocity,
+		const bool input_contact_state);
+
 
 public:
 
@@ -249,66 +370,3 @@ public:
 	void SetCharacterRotationRest(); //캐릭터의 rotation을 bone_rest_rotations으로 설정
 
 };
-
-
-
-
-//------------------------------------------------------
-//<사용자 정의 부분>
-
-//static inline Vector3 to_Vector3(vec3 v)
-//{
-//	return (Vector3) { v.x, v.y, v.z };
-//}
-
-
-
-
-
-//--------------------------------------
-// Basic functionality to get gamepad input including deadzone and 
-// squaring of the stick location to increase sensitivity. To make 
-// all the other code that uses this easier, we assume stick is 
-// oriented on floor (i.e. y-axis is zero)
-
-//라고 하는데 아직은 왜 사용하는지 모르겠음
-enum
-{
-	GAMEPAD_PLAYER = 0,
-};
-
-enum
-{
-	GAMEPAD_STICK_LEFT,
-	GAMEPAD_STICK_RIGHT,
-};
-
-
-
-////------------------------------------------------------
-//vec3 gamepad_get_stick(int stick, const float deadzone = 0.2f)
-//{
-//	//GetGamepadAxisMovement 이 함수를 대체할 것을 알아내야 함
-//	float gamepadx = GetGamepadAxisMovement(GAMEPAD_PLAYER, stick == GAMEPAD_STICK_LEFT ? GAMEPAD_AXIS_LEFT_X : GAMEPAD_AXIS_RIGHT_X);
-//	float gamepady = GetGamepadAxisMovement(GAMEPAD_PLAYER, stick == GAMEPAD_STICK_LEFT ? GAMEPAD_AXIS_LEFT_Y : GAMEPAD_AXIS_RIGHT_Y);
-//	float gamepadmag = sqrtf(gamepadx * gamepadx + gamepady * gamepady);
-//
-//	if (gamepadmag > deadzone)
-//	{
-//		float gamepaddirx = gamepadx / gamepadmag;
-//		float gamepaddiry = gamepady / gamepadmag;
-//		float gamepadclippedmag = gamepadmag > 1.0f ? 1.0f : gamepadmag * gamepadmag;
-//		gamepadx = gamepaddirx * gamepadclippedmag;
-//		gamepady = gamepaddiry * gamepadclippedmag;
-//	}
-//	else
-//	{
-//		gamepadx = 0.0f;
-//		gamepady = 0.0f;
-//	}
-//
-//	return vec3(gamepadx, 0.0f, gamepady);
-//}
-
-
-////------------------------------------------------------
