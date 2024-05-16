@@ -178,10 +178,7 @@ public: //poseblemesh 관련
 	virtual UPoseableMeshComponent* GetMesh() const;
 
 	UFUNCTION()
-	void PoseTest(); //Pose test하기 위한 함수
-
-	UFUNCTION()
-	void PoseTest2(int frameindex); //Pose test하기 위한 함수 //원하는 frame 값 넣으면 그에 해당하는 pose를 출력함
+	void PoseTest(int frameindex); //Pose test하기 위한 함수 //원하는 frame 값 넣으면 그에 해당하는 pose를 출력함
 
 	UFUNCTION()
 	void PoseTestByPostion(int frameindex); //Pose test하기 위한 함수 //원하는 frame 값 넣으면 그에 해당하는 pose를 출력함

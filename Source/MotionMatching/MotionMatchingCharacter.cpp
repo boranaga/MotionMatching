@@ -96,10 +96,9 @@ void AMotionMatchingCharacter::BeginPlay()
 	//MotionMatching BeginPlay
 	MotionMatchingMainBeginPlay();
 
-	//PoseTest
-	//PoseTest();
+
 	//PoseTestByPostion(0);
-	//PoseTest2(0); //우선은 프레임 0의 포즈 출력해 봄
+	//PoseTest(0); //우선은 프레임 0의 포즈 출력해 봄
 
 	//SetCharacterPositionRest();
 	SetCharacterRotationRest();
@@ -314,90 +313,7 @@ void AMotionMatchingCharacter::inertialize_pose_update(
 //---------------------------------------------------------------------
 
 
-void AMotionMatchingCharacter::PoseTest() {
-
-
-	//수정한 코드 (x y z w)
-	FQuat Root = FQuat(-0.00000000e+00, -7.20359683e-01, 0.00000000e+00, 6.93600714e-01);
-	FQuat Hips = FQuat(5.10667503e-01, 4.95325178e-01, 5.04266381e-01, 4.89476293e-01);
-
-	FQuat LeftUpLeg = FQuat(2.53748521e-02, 9.90944326e-01, 1.31835669e-01, 2.17995676e-03);
-	FQuat LeftLeg = FQuat(-8.28921720e-02, 2.09991354e-02, -1.01421498e-01, 9.91161764e-01);
-	FQuat LeftFoot = FQuat(-6.12904504e-02, 1.27482358e-02, 6.35808527e-01, 7.69303858e-01);
-	FQuat LeftToe = FQuat(-5.01755130e-06, 2.64855244e-05, 1.86134368e-01, 9.82524276e-01);
-
-	FQuat RightUpLeg = FQuat(6.63435310e-02, 9.96164322e-01, 5.69788963e-02, -2.91720871e-03);
-	FQuat RightLeg = FQuat(2.46823877e-02, -4.81897965e-02, -1.52169123e-01, 9.86870348e-01);
-	FQuat RightFoot = FQuat(5.02567403e-02, 3.30432840e-02, 6.42255843e-01, 7.64126837e-01);
-	FQuat RightToe = FQuat(4.90265484e-06, -2.66760471e-05, 1.86134413e-01, 9.82524276e-01);
-
-	FQuat Spine = FQuat(-6.09852746e-03, 5.04404353e-03, 5.49792647e-02, 9.98456120e-01);
-	FQuat Spine1 = FQuat(-1.17475521e-02, 1.06054097e-02, 2.26353761e-02, 9.99618471e-01);
-	FQuat Spine2 = FQuat(-1.17821014e-02, 1.05682043e-02, 1.98605321e-02, 9.99677479e-01);
-
-	FQuat Neck = FQuat(-2.18032510e-03, -7.87054747e-02, -6.44085109e-02, 9.94812667e-01);
-	FQuat Head = FQuat(-4.80575450e-02, 5.41895144e-02, 8.09299946e-03, 9.97340679e-01);
-
-	FQuat LeftShoulder = FQuat(-6.07465804e-01, 4.18190621e-02, -7.93006480e-01, 1.94211192e-02);
-	FQuat LeftArm = FQuat(2.14652315e-01, 4.35188383e-01, -2.56695211e-01, 8.35848689e-01);
-	FQuat LeftForeArm = FQuat(-9.66933277e-03, -6.76918477e-02, -2.28246704e-01, 9.71199155e-01);
-	FQuat LeftHand = FQuat(2.77632058e-01, -1.67130064e-02, 1.20311685e-01, 9.52977538e-01);
-
-	FQuat RightShoulder = FQuat(6.05823994e-01, -4.13361564e-02, -7.94293225e-01, 1.91542506e-02);
-	FQuat RightArm = FQuat(-2.86332458e-01, -4.24856454e-01, -1.92388535e-01, 8.36957216e-01);
-	FQuat RightForeArm = FQuat(2.23726705e-02, 1.18756600e-01, -2.66182274e-01, 9.56317604e-01);
-	FQuat RightHand = FQuat(-1.00682385e-01, 1.92709230e-02, 9.08031687e-02, 9.90578830e-01);
-
-
-	FQuat Root2 = FQuat(1, 0, 0, 90);
-
-	FQuat LeftUpLeg2 = FQuat(0, 0, 1, 90);
-	FQuat LeftLeg2 = FQuat(0, 1, 0, 90);
-	FQuat LeftFoot2 = FQuat(0, 1, 0, 90);
-	FQuat LeftToe2 = FQuat(0, 0, 1, 90);
-
-
-
-	////현재 로테이터에 새로운 값 더한 것
-	GetMesh()->SetBoneRotationByName(FName(TEXT("Root")), Root.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("Root")), EBoneSpaces::WorldSpace), EBoneSpaces::WorldSpace);
-
-	//GetMesh()->SetBoneRotationByName(FName(TEXT("Root")), Root.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("Root")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-
-	GetMesh()->SetBoneRotationByName(FName(TEXT("Hips")), Hips.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("Hips")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-
-	GetMesh()->SetBoneRotationByName(FName(TEXT("LeftUpLeg")), LeftUpLeg.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("LeftUpLeg")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("LeftLeg")), LeftLeg.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("LeftLeg")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("LeftFoot")), LeftFoot.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("LeftFoot")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("LeftToe")), LeftToe.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("LeftToe")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-
-	GetMesh()->SetBoneRotationByName(FName(TEXT("RightUpLeg")), RightUpLeg.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("RightUpLeg")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("RightLeg")), RightLeg.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("RightLeg")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("RightFoot")), RightFoot.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("RightFoot")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("RightToe")), RightToe.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("RightToe")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-
-	GetMesh()->SetBoneRotationByName(FName(TEXT("Spine")), Spine.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("Spine")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("Spine1")), Spine1.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("Spine1")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("Spine2")), Spine2.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("Spine2")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-
-	GetMesh()->SetBoneRotationByName(FName(TEXT("Neck")), Neck.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("Neck")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("Head")), Head.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("Head")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-
-	GetMesh()->SetBoneRotationByName(FName(TEXT("LeftShoulder")), LeftShoulder.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("LeftShoulder")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("LeftArm")), LeftArm.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("LeftArm")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("LeftForeArm")), LeftForeArm.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("LeftForeArm")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("LeftHand")), LeftHand.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("LeftHand")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-
-	GetMesh()->SetBoneRotationByName(FName(TEXT("RightShoulder")), RightShoulder.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("RightShoulder")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("RightArm")), RightArm.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("RightArm")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("RightForeArm")), RightForeArm.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("RightForeArm")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-	GetMesh()->SetBoneRotationByName(FName(TEXT("RightHand")), RightHand.Rotator() + GetMesh()->GetBoneRotationByName(FName(TEXT("RightHand")), EBoneSpaces::ComponentSpace), EBoneSpaces::ComponentSpace);
-
-
-
-}
-
-
-void AMotionMatchingCharacter::PoseTest2(int frameindex) {
+void AMotionMatchingCharacter::PoseTest(int frameindex) {
 
 	float pi = 3.141592;
 
@@ -408,7 +324,7 @@ void AMotionMatchingCharacter::PoseTest2(int frameindex) {
 	int JointsNum = JointsNames2.Num();
 
 	//db로부터 원하는 frame의 rotation data 가져옴
-	array1d<quat> curr_bone_rotations = db.bone_rotations(frameindex);
+	array1d<quat> bone_rotations = db.bone_rotations(frameindex);
 
 
 	//현재 프레임의 쿼터니언 데이터 저장 //curr_bone_rotations.size
@@ -416,30 +332,12 @@ void AMotionMatchingCharacter::PoseTest2(int frameindex) {
 
 	for (int i = 0; i < JointsNum; i++) {
 
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * scale, curr_bone_rotations.data[i].y * scale, curr_bone_rotations.data[i].z * scale, curr_bone_rotations.data[i].w * scale));
-
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].y * (-1), curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].x * (-1), curr_bone_rotations.data[i].w * scale) * (-1));
-
-		//현재로서는 가장 근접
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].w * scale* (1)));
-
-		
-		//acos(curr_bone_rotations.data[i].w) * 2 * (180 / pi)
-
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].w * scale * (1)) );
-
-		//JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (1), curr_bone_rotations.data[i].y * (1), acos(curr_bone_rotations.data[i].w) * 2 * (180 / pi)));
-
-		JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].w));
+		JointsQuat.Emplace(FQuat(bone_rotations.data[i].y * (1), bone_rotations.data[i].x * (1), bone_rotations.data[i].z * (-1), bone_rotations.data[i].w));
 	}
 
-
 	//Set pose
-	//GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator() + BasicCharatorRotator[0], EBoneSpaces::ComponentSpace);
-	//GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator() + BasicCharatorRotator[0], EBoneSpaces::WorldSpace); //basic에 rotation 더한 값
 
 	GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator(), EBoneSpaces::WorldSpace);
-
 	//GetMesh()->SetBoneRotationByName(FName(JointsNames2[0]), JointsQuat[0].Rotator(), EBoneSpaces::WorldSpace); //그냥 rotation만 적용 시키는 것
 
 	for (int i = 1; i < JointsNum; i++) {
@@ -461,14 +359,14 @@ void AMotionMatchingCharacter::PoseTestByPostion(int frameindex) {
 	int JointsNum = JointsNames2.Num();
 
 	//db로부터 원하는 frame의 rotation data 가져옴
-	array1d<vec3> curr_bone_positions = db.bone_positions(frameindex);
+	array1d<vec3> bone_positions = db.bone_positions(frameindex);
 
 	//현재 프레임의 position 데이터 저장 //curr_bone_rotations.size
 	TArray<FVector> JointsVector;
 	for (int i = 0; i < JointsNum; i++) {
 		//JointsVector.Emplace(FVector(curr_bone_positions.data[i].x * scale, curr_bone_positions.data[i].y * scale, curr_bone_positions.data[i].z * scale));
 
-		JointsVector.Emplace(FVector(curr_bone_positions.data[i].x * scale, curr_bone_positions.data[i].z * scale, curr_bone_positions.data[i].x * scale));
+		JointsVector.Emplace(FVector(bone_positions.data[i].x * scale, bone_positions.data[i].z * scale, bone_positions.data[i].x * scale));
 	}
 
 	//Set Pose
@@ -670,11 +568,11 @@ void AMotionMatchingCharacter::SetCharacterPositionRest() {
 	//관절의 개수
 	int JointsNum = JointsNames2.Num();
 
-	array1d<vec3> curr_bone_positions = character_data.bone_rest_positions;
+	array1d<vec3> bone_positions = character_data.bone_rest_positions;
 
 	TArray<FVector> JointsVector;
 	for (int i = 0; i < JointsNum; i++) {
-		JointsVector.Emplace(FVector(curr_bone_positions.data[i].x * scale, curr_bone_positions.data[i].z * scale, curr_bone_positions.data[i].y * scale));
+		JointsVector.Emplace(FVector(bone_positions.data[i].x * scale, bone_positions.data[i].z * scale, bone_positions.data[i].y * scale));
 	}
 
 	//Set Pose
@@ -698,14 +596,14 @@ void AMotionMatchingCharacter::SetCharacterRotationRest() {
 	//관절의 개수
 	int JointsNum = JointsNames2.Num();
 
-	array1d<quat> curr_bone_rotations = character_data.bone_rest_rotations;
+	array1d<quat> bone_rotations = character_data.bone_rest_rotations;
 
 	TArray<FQuat> JointsQuat;
 
 	for (int i = 0; i < JointsNum; i++) {
 
 		//언리얼에 맞게 좌표계를 변환해줌
-		JointsQuat.Emplace(FQuat(curr_bone_rotations.data[i].y * (1), curr_bone_rotations.data[i].x * (1), curr_bone_rotations.data[i].z * (-1), curr_bone_rotations.data[i].w));
+		JointsQuat.Emplace(FQuat(bone_rotations.data[i].y * (1), bone_rotations.data[i].x * (1), bone_rotations.data[i].z * (-1), bone_rotations.data[i].w));
 
 	}
 
