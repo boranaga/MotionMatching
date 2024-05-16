@@ -115,19 +115,24 @@ void AMotionMatchingCharacter::BeginPlay()
 	SaveBasicVectors();
 
 
+	//Character.bin load test
+	CharacterLoadTest();
+
 	//MotionMatching BeginPlay
 	MotionMatchingMainBeginPlay();
 
 	//PoseTest
 	//PoseTest();
-	PoseTestByPostion(0);
+	//PoseTestByPostion(0);
 	//PoseTest2(300); //우선은 프레임 0의 포즈 출력해 봄
+
+	//SetCharacterPositionRest();
+	//SetCharacterRotationRest();
 
 	//DataBase Log Test
 	DataBaseLog();
 
-	//Character.bin load test
-	CharacterLoadTest();
+
 
 }
 
