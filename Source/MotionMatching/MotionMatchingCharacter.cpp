@@ -81,31 +81,6 @@ void AMotionMatchingCharacter::BeginPlay()
 	}
 
 
-	//test용으로 한번 내가 추가함
-	//std::cout << "이게 되네?"; //일단 이건 안됨
-	
-	//testfunc();
-	//UE_LOG(LogTemp, Log, TEXT("HIHIHiHIHIhIhIhI22222"));
-
-	float test_a = 0.1f;
-	float test_b = 0.5f;
-	float x = 0.3f;
-
-	float result = clampf(x, test_a, test_b);
-
-
-
-	vec2 test_vec1 = vec2(test_a, test_b);
-	vec2 test_vec2 = vec2(test_a, 0.0f);
-
-	vec2 vec_result = test_vec1 - test_vec2;
-
-
-	UE_LOG(LogTemp, Log, TEXT("MyFloat value: %f"), result);
-	UE_LOG(LogTemp, Log, TEXT("MyFloat value: %f, %f"), vec_result.x, vec_result.y);
-
-
-	//LoadBinaryFile("E:/Unreal_engine_projects/MotionMatching/database.bin");
 
 	//---------------------------------------------------
 	
@@ -116,7 +91,7 @@ void AMotionMatchingCharacter::BeginPlay()
 
 
 	//Character.bin load test
-	CharacterLoadTest();
+	//CharacterLoadTest();
 
 	//MotionMatching BeginPlay
 	MotionMatchingMainBeginPlay();
@@ -384,10 +359,28 @@ void AMotionMatchingCharacter::PoseTestByPostion(int frameindex) {
 
 void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 
-	//해당 경로의 database.bin 파일을 load 하여 db에 저장함
+
+	// Character
+	character_load(character_data, "E:/Unreal_engine_projects/MotionMatching/character.bin");
+
+	// Load Animation Data
 	database_load(db, "E:/Unreal_engine_projects/MotionMatching/database.bin");
-	
+
+	// build Matching Database
+	database_build_matching_features(
+		db,
+		feature_weight_foot_position,
+		feature_weight_foot_velocity,
+		feature_weight_hip_velocity,
+		feature_weight_trajectory_positions,
+		feature_weight_trajectory_directions);
+
+	database_save_matching_features(db, "E:/Unreal_engine_projects/MotionMatching/features.bin");
 }
+
+
+
+
 
 
 

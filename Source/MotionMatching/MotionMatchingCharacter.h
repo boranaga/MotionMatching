@@ -112,13 +112,31 @@ protected: //Motion Matching 관련 variables
 	};
 
 
-
 	//스켈레톤의 기본 rotator 값 저장
 	TArray<FRotator> BasicCharatorRotator;
 	//스켈레톤의 기본 position(vector) 값 저장
 	TArray<FVector> BasicCharatorVector;
 
-	database db;
+
+	// Load Animation Data and build Matching Database
+	database db; //database.bin과 features.bin 모두 db에 저장됨
+
+	//feature를 저장할 때 사용되는 weight의 값
+	float feature_weight_foot_position = 0.75f;
+	float feature_weight_foot_velocity = 1.0f;
+	float feature_weight_hip_velocity = 1.0f;
+	float feature_weight_trajectory_positions = 1.0f;
+	float feature_weight_trajectory_directions = 1.5f;
+
+
+	// Character
+	character character_data;
+
+
+
+
+
+
 
 
 public:
@@ -171,10 +189,10 @@ public: //poseblemesh 관련
 public: //Motion Matching 관련
 	
 	UFUNCTION()
-	void MotionMatchingMainBeginPlay();
+	void MotionMatchingMainBeginPlay(); //MotionMatching에 사용할 초기 데이터 load 함수 등이 포함됨(초기 변수 초기화)
 
 	UFUNCTION()
-	void MotionMatchingMainTick();
+	void MotionMatchingMainTick(); 
 
 	UFUNCTION()
 	void SaveBasicRotators(); //캐릭터 스켈레톤의 기본 Rotator 값 저장
@@ -187,8 +205,7 @@ public: //Motion Matching 관련
 	void DataBaseLog();
 
 
-public: //character.bin load test
-	character character_data;
+public:
 
 	UFUNCTION()
 	void CharacterLoadTest();

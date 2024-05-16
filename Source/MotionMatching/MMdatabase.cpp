@@ -43,6 +43,8 @@ void database_save_matching_features(const database& db, const char* filename)
     array1d_write(db.features_scale, f);
 
     fclose(f);
+
+    UE_LOG(LogTemp, Log, TEXT("Feature vector data generation and save complete"));
 }
 
 //---------------------------------------------------------------
