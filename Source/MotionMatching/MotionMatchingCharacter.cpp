@@ -386,10 +386,17 @@ void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 
 
 	// Character
-	character_load(character_data, "E:/Unreal_engine_projects/MotionMatching/character.bin");
+	
+	FString CharacterFilePath = FPaths::ProjectContentDir() + TEXT("/character.bin");
+	const char* CharacterFilePathChar = TCHAR_TO_ANSI(*CharacterFilePath); 	// TCHAR_TO_ANSI 매크로를 사용하여 변환
+	character_load(character_data, CharacterFilePathChar);
+
 
 	// Load Animation Data
-	database_load(db, "E:/Unreal_engine_projects/MotionMatching/database.bin");
+
+	FString DatabaseFilePath = FPaths::ProjectContentDir() + TEXT("/database.bin");
+	const char* DatabaseFilePathChar = TCHAR_TO_ANSI(*DatabaseFilePath); 	// TCHAR_TO_ANSI 매크로를 사용하여 변환
+	database_load(db, DatabaseFilePathChar);
 
 	// build Matching Database
 	database_build_matching_features(
@@ -400,8 +407,10 @@ void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 		feature_weight_trajectory_positions,
 		feature_weight_trajectory_directions);
 
-	database_save_matching_features(db, "E:/Unreal_engine_projects/MotionMatching/features.bin");
 
+	FString FeaturesFilePath = FPaths::ProjectContentDir() + TEXT("/features.bin");
+	const char* FeaturesFilePathChar = TCHAR_TO_ANSI(*FeaturesFilePath); 	// TCHAR_TO_ANSI 매크로를 사용하여 변환
+	database_save_matching_features(db, FeaturesFilePathChar);
 
 
 	// Pose & Inertializer Data
@@ -542,7 +551,9 @@ void AMotionMatchingCharacter::SaveBasicVectors() {
 
 void AMotionMatchingCharacter::CharacterLoadTest() {
 
-	character_load(character_data, "E:/Unreal_engine_projects/MotionMatching/character.bin");
+	FString CharacterFilePath = FPaths::ProjectContentDir() + TEXT("/character.bin");
+	const char* CharacterFilePathChar = TCHAR_TO_ANSI(*CharacterFilePath); 	// TCHAR_TO_ANSI 매크로를 사용하여 변환
+	character_load(character_data, CharacterFilePathChar);
 
 	UE_LOG(LogTemp, Log, TEXT("positions length: %d"), character_data.positions.size);
 	UE_LOG(LogTemp, Log, TEXT("bone_rest_positions length: %d"), character_data.bone_rest_positions.size);

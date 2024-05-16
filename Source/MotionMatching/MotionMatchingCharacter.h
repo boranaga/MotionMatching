@@ -134,12 +134,6 @@ protected: //Motion Matching ฐüทร variables
 	character character_data;
 
 
-
-
-
-
-
-
 public:
 	AMotionMatchingCharacter();
 	
