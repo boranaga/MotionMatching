@@ -187,6 +187,133 @@ UPoseableMeshComponent* AMotionMatchingCharacter::GetMesh() const
 
 
 
+
+//---------------------------------------------------------------------
+//<controller.cpp에 정의되어 있는 함수들>
+
+
+void AMotionMatchingCharacter::inertialize_pose_reset(
+	slice1d<vec3> bone_offset_positions,
+	slice1d<vec3> bone_offset_velocities,
+	slice1d<quat> bone_offset_rotations,
+	slice1d<vec3> bone_offset_angular_velocities,
+	vec3& transition_src_position,
+	quat& transition_src_rotation,
+	vec3& transition_dst_position,
+	quat& transition_dst_rotation,
+	const vec3 root_position,
+	const quat root_rotation)
+{
+	bone_offset_positions.zero();
+	bone_offset_velocities.zero();
+	bone_offset_rotations.set(quat());
+	bone_offset_angular_velocities.zero();
+
+	transition_src_position = root_position;
+	transition_src_rotation = root_rotation;
+	transition_dst_position = vec3();
+	transition_dst_rotation = quat();
+}
+
+
+
+// This function updates the inertializer states. Here 
+// it outputs the smoothed animation (input plus offset) 
+// as well as updating the offsets themselves. It takes 
+// as input the current playing animation as well as the 
+// root transition locations, a halflife, and a dt
+void AMotionMatchingCharacter::inertialize_pose_update(
+	slice1d<vec3> bone_positions,
+	slice1d<vec3> bone_velocities,
+	slice1d<quat> bone_rotations,
+	slice1d<vec3> bone_angular_velocities,
+	slice1d<vec3> bone_offset_positions,
+	slice1d<vec3> bone_offset_velocities,
+	slice1d<quat> bone_offset_rotations,
+	slice1d<vec3> bone_offset_angular_velocities,
+	const slice1d<vec3> bone_input_positions,
+	const slice1d<vec3> bone_input_velocities,
+	const slice1d<quat> bone_input_rotations,
+	const slice1d<vec3> bone_input_angular_velocities,
+	const vec3 transition_src_position,
+	const quat transition_src_rotation,
+	const vec3 transition_dst_position,
+	const quat transition_dst_rotation,
+	const float halflife,
+	const float dt)
+{
+	// First we find the next root position, velocity, rotation
+	// and rotational velocity in the world space by transforming 
+	// the input animation from it's animation space into the 
+	// space of the currently playing animation.
+	vec3 world_space_position = quat_mul_vec3(transition_dst_rotation,
+		quat_inv_mul_vec3(transition_src_rotation,
+			bone_input_positions(0) - transition_src_position)) + transition_dst_position;
+
+	vec3 world_space_velocity = quat_mul_vec3(transition_dst_rotation,
+		quat_inv_mul_vec3(transition_src_rotation, bone_input_velocities(0)));
+
+	// Normalize here because quat inv mul can sometimes produce 
+	// unstable returns when the two rotations are very close.
+	quat world_space_rotation = quat_normalize(quat_mul(transition_dst_rotation,
+		quat_inv_mul(transition_src_rotation, bone_input_rotations(0))));
+
+	vec3 world_space_angular_velocity = quat_mul_vec3(transition_dst_rotation,
+		quat_inv_mul_vec3(transition_src_rotation, bone_input_angular_velocities(0)));
+
+	// Then we update these two inertializers with these new world space inputs
+	inertialize_update( //MMspring.h
+		bone_positions(0),
+		bone_velocities(0),
+		bone_offset_positions(0),
+		bone_offset_velocities(0),
+		world_space_position,
+		world_space_velocity,
+		halflife,
+		dt);
+
+	inertialize_update(
+		bone_rotations(0),
+		bone_angular_velocities(0),
+		bone_offset_rotations(0),
+		bone_offset_angular_velocities(0),
+		world_space_rotation,
+		world_space_angular_velocity,
+		halflife,
+		dt);
+
+	// Then we update the inertializers for the rest of the bones
+	for (int i = 1; i < bone_positions.size; i++)
+	{
+		inertialize_update(
+			bone_positions(i),
+			bone_velocities(i),
+			bone_offset_positions(i),
+			bone_offset_velocities(i),
+			bone_input_positions(i),
+			bone_input_velocities(i),
+			halflife,
+			dt);
+
+		inertialize_update(
+			bone_rotations(i),
+			bone_angular_velocities(i),
+			bone_offset_rotations(i),
+			bone_offset_angular_velocities(i),
+			bone_input_rotations(i),
+			bone_input_angular_velocities(i),
+			halflife,
+			dt);
+	}
+}
+
+
+
+
+
+//---------------------------------------------------------------------
+
+
 void AMotionMatchingCharacter::PoseTest() {
 
 
@@ -376,6 +503,81 @@ void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 		feature_weight_trajectory_directions);
 
 	database_save_matching_features(db, "E:/Unreal_engine_projects/MotionMatching/features.bin");
+
+
+
+	// Pose & Inertializer Data
+
+	int frame_index = db.range_starts(0);
+	float inertialize_blending_halflife = 0.1f;
+
+	array1d<vec3> curr_bone_positions = db.bone_positions(frame_index);
+	array1d<vec3> curr_bone_velocities = db.bone_velocities(frame_index);
+	array1d<quat> curr_bone_rotations = db.bone_rotations(frame_index);
+	array1d<vec3> curr_bone_angular_velocities = db.bone_angular_velocities(frame_index);
+	array1d<bool> curr_bone_contacts = db.contact_states(frame_index);
+
+	array1d<vec3> trns_bone_positions = db.bone_positions(frame_index);
+	array1d<vec3> trns_bone_velocities = db.bone_velocities(frame_index);
+	array1d<quat> trns_bone_rotations = db.bone_rotations(frame_index);
+	array1d<vec3> trns_bone_angular_velocities = db.bone_angular_velocities(frame_index);
+	array1d<bool> trns_bone_contacts = db.contact_states(frame_index);
+
+	array1d<vec3> bone_positions = db.bone_positions(frame_index);
+	array1d<vec3> bone_velocities = db.bone_velocities(frame_index);
+	array1d<quat> bone_rotations = db.bone_rotations(frame_index);
+	array1d<vec3> bone_angular_velocities = db.bone_angular_velocities(frame_index);
+
+	array1d<vec3> bone_offset_positions(db.nbones());
+	array1d<vec3> bone_offset_velocities(db.nbones());
+	array1d<quat> bone_offset_rotations(db.nbones());
+	array1d<vec3> bone_offset_angular_velocities(db.nbones());
+
+	array1d<vec3> global_bone_positions(db.nbones());
+	array1d<vec3> global_bone_velocities(db.nbones());
+	array1d<quat> global_bone_rotations(db.nbones());
+	array1d<vec3> global_bone_angular_velocities(db.nbones());
+	array1d<bool> global_bone_computed(db.nbones());
+
+	vec3 transition_src_position;
+	quat transition_src_rotation;
+	vec3 transition_dst_position;
+	quat transition_dst_rotation;
+
+	inertialize_pose_reset(
+		bone_offset_positions,
+		bone_offset_velocities,
+		bone_offset_rotations,
+		bone_offset_angular_velocities,
+		transition_src_position,
+		transition_src_rotation,
+		transition_dst_position,
+		transition_dst_rotation,
+		bone_positions(0),
+		bone_rotations(0));
+
+	inertialize_pose_update(
+		bone_positions,
+		bone_velocities,
+		bone_rotations,
+		bone_angular_velocities,
+		bone_offset_positions,
+		bone_offset_velocities,
+		bone_offset_rotations,
+		bone_offset_angular_velocities,
+		db.bone_positions(frame_index),
+		db.bone_velocities(frame_index),
+		db.bone_rotations(frame_index),
+		db.bone_angular_velocities(frame_index),
+		transition_src_position,
+		transition_src_rotation,
+		transition_dst_position,
+		transition_dst_rotation,
+		inertialize_blending_halflife,
+		0.0f);
+
+
+
 }
 
 

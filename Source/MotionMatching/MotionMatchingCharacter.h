@@ -9,6 +9,7 @@
 #include "MMcommon.h"
 #include "MMvec.h"
 #include "MMquat.h"
+#include "MMspring.h"
 #include "MMarray.h"
 #include "MMcharacter.h"
 #include "MMdatabase.h"
@@ -188,6 +189,8 @@ public: //poseblemesh 관련
 
 public: //Motion Matching 관련
 	
+
+	//기본 베이스 및 내가 추가한 것
 	UFUNCTION()
 	void MotionMatchingMainBeginPlay(); //MotionMatching에 사용할 초기 데이터 load 함수 등이 포함됨(초기 변수 초기화)
 
@@ -203,6 +206,24 @@ public: //Motion Matching 관련
 
 	UFUNCTION()
 	void DataBaseLog();
+
+
+	//-------------------------------------------------------------------
+	//오렌지 덕의 controller.cpp에 정의되어 있는 함수들
+	void inertialize_pose_reset(
+		slice1d<vec3> bone_offset_positions,
+		slice1d<vec3> bone_offset_velocities,
+		slice1d<quat> bone_offset_rotations,
+		slice1d<vec3> bone_offset_angular_velocities,
+		vec3& transition_src_position,
+		quat& transition_src_rotation,
+		vec3& transition_dst_position,
+		quat& transition_dst_rotation,
+		const vec3 root_position,
+		const quat root_rotation);
+
+
+
 
 
 public:
