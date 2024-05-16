@@ -210,6 +210,7 @@ public: //Motion Matching 관련
 
 	//-------------------------------------------------------------------
 	//오렌지 덕의 controller.cpp에 정의되어 있는 함수들
+
 	void inertialize_pose_reset(
 		slice1d<vec3> bone_offset_positions,
 		slice1d<vec3> bone_offset_velocities,
@@ -223,6 +224,25 @@ public: //Motion Matching 관련
 		const quat root_rotation);
 
 
+	void inertialize_pose_update(
+		slice1d<vec3> bone_positions,
+		slice1d<vec3> bone_velocities,
+		slice1d<quat> bone_rotations,
+		slice1d<vec3> bone_angular_velocities,
+		slice1d<vec3> bone_offset_positions,
+		slice1d<vec3> bone_offset_velocities,
+		slice1d<quat> bone_offset_rotations,
+		slice1d<vec3> bone_offset_angular_velocities,
+		const slice1d<vec3> bone_input_positions,
+		const slice1d<vec3> bone_input_velocities,
+		const slice1d<quat> bone_input_rotations,
+		const slice1d<vec3> bone_input_angular_velocities,
+		const vec3 transition_src_position,
+		const quat transition_src_rotation,
+		const vec3 transition_dst_position,
+		const quat transition_dst_rotation,
+		const float halflife,
+		const float dt);
 
 
 
