@@ -347,6 +347,91 @@ void AMotionMatchingCharacter::inertialize_pose_reset(
 }
 
 
+// This function transitions the inertializer for 
+// the full character. It takes as input the current 
+// offsets, as well as the root transition locations,
+// current root state, and the full pose information 
+// for the pose being transitioned from (src) as well 
+// as the pose being transitioned to (dst) in their
+// own animation spaces.
+void AMotionMatchingCharacter::inertialize_pose_transition(
+	slice1d<vec3> bone_offset_positions,
+	slice1d<vec3> bone_offset_velocities,
+	slice1d<quat> bone_offset_rotations,
+	slice1d<vec3> bone_offset_angular_velocities,
+	vec3& transition_src_position,
+	quat& transition_src_rotation,
+	vec3& transition_dst_position,
+	quat& transition_dst_rotation,
+	const vec3 root_position,
+	const vec3 root_velocity,
+	const quat root_rotation,
+	const vec3 root_angular_velocity,
+	const slice1d<vec3> bone_src_positions,
+	const slice1d<vec3> bone_src_velocities,
+	const slice1d<quat> bone_src_rotations,
+	const slice1d<vec3> bone_src_angular_velocities,
+	const slice1d<vec3> bone_dst_positions,
+	const slice1d<vec3> bone_dst_velocities,
+	const slice1d<quat> bone_dst_rotations,
+	const slice1d<vec3> bone_dst_angular_velocities)
+{
+	// First we record the root position and rotation
+	// in the animation data for the source and destination
+	// animation
+	transition_dst_position = root_position;
+	transition_dst_rotation = root_rotation;
+	transition_src_position = bone_dst_positions(0);
+	transition_src_rotation = bone_dst_rotations(0);
+
+	// We then find the velocities so we can transition the 
+	// root inertiaizers
+	vec3 world_space_dst_velocity = quat_mul_vec3(transition_dst_rotation,
+		quat_inv_mul_vec3(transition_src_rotation, bone_dst_velocities(0)));
+
+	vec3 world_space_dst_angular_velocity = quat_mul_vec3(transition_dst_rotation,
+		quat_inv_mul_vec3(transition_src_rotation, bone_dst_angular_velocities(0)));
+
+	// Transition inertializers recording the offsets for 
+	// the root joint
+	inertialize_transition(
+		bone_offset_positions(0),
+		bone_offset_velocities(0),
+		root_position,
+		root_velocity,
+		root_position,
+		world_space_dst_velocity);
+
+	inertialize_transition(
+		bone_offset_rotations(0),
+		bone_offset_angular_velocities(0),
+		root_rotation,
+		root_angular_velocity,
+		root_rotation,
+		world_space_dst_angular_velocity);
+
+	// Transition all the inertializers for each other bone
+	for (int i = 1; i < bone_offset_positions.size; i++)
+	{
+		inertialize_transition(
+			bone_offset_positions(i),
+			bone_offset_velocities(i),
+			bone_src_positions(i),
+			bone_src_velocities(i),
+			bone_dst_positions(i),
+			bone_dst_velocities(i));
+
+		inertialize_transition(
+			bone_offset_rotations(i),
+			bone_offset_angular_velocities(i),
+			bone_src_rotations(i),
+			bone_src_angular_velocities(i),
+			bone_dst_rotations(i),
+			bone_dst_angular_velocities(i));
+	}
+}
+
+
 
 // This function updates the inertializer states. Here 
 // it outputs the smoothed animation (input plus offset) 
@@ -1044,7 +1129,132 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 	// Check if we reached the end of the current anim
 	bool end_of_anim = database_trajectory_index_clamp(DB, Frame_index, 1) == Frame_index; //MMdatabase에 정의되어 있음
 
-	
+	// Do we need to search?
+	if (force_search || Search_timer <= 0.0f || end_of_anim)
+	{
+		if (LMM_enabled)
+		{
+			// Project query onto nearest feature vector
+
+			float best_cost = FLT_MAX;
+			bool transition = false;
+
+			projector_evaluate( //MMlmm에 정의되어 있음
+				transition,
+				best_cost,
+				Features_proj,
+				Latent_proj,
+				Projector_evaluation,
+				query,
+				DB.features_offset,
+				DB.features_scale,
+				Features_curr,
+				Projector,
+				0.0f);
+
+			// If projection is sufficiently different from current
+			if (transition)
+			{
+				// Evaluate pose for projected features
+				decompressor_evaluate(
+					Trns_bone_positions,
+					Trns_bone_velocities,
+					Trns_bone_rotations,
+					Trns_bone_angular_velocities,
+					Trns_bone_contacts,
+					Decompressor_evaluation,
+					Features_proj,
+					Latent_proj,
+					Curr_bone_positions(0),
+					Curr_bone_rotations(0),
+					Decompressor,
+					DeltaT);
+
+				// Transition inertializer to this pose
+				inertialize_pose_transition(
+					Bone_offset_positions,
+					Bone_offset_velocities,
+					Bone_offset_rotations,
+					Bone_offset_angular_velocities,
+					Transition_src_position,
+					Transition_src_rotation,
+					Transition_dst_position,
+					Transition_dst_rotation,
+					Bone_positions(0),
+					Bone_velocities(0),
+					Bone_rotations(0),
+					Bone_angular_velocities(0),
+					Curr_bone_positions,
+					Curr_bone_velocities,
+					Curr_bone_rotations,
+					Curr_bone_angular_velocities,
+					Trns_bone_positions,
+					Trns_bone_velocities,
+					Trns_bone_rotations,
+					Trns_bone_angular_velocities);
+
+				// Update current features and latents
+				Features_curr = Features_proj;
+				Latent_curr = Latent_proj;
+			}
+		}
+		else
+		{
+			// Search
+
+			int best_index = end_of_anim ? -1 : Frame_index;
+			float best_cost = FLT_MAX;
+
+			database_search(
+				best_index,
+				best_cost,
+				DB,
+				query,
+				0.0f,
+				20,
+				20);
+
+			// Transition if better frame found
+
+			if (best_index != Frame_index)
+			{
+				Trns_bone_positions = DB.bone_positions(best_index);
+				Trns_bone_velocities = DB.bone_velocities(best_index);
+				Trns_bone_rotations = DB.bone_rotations(best_index);
+				Trns_bone_angular_velocities = DB.bone_angular_velocities(best_index);
+
+				inertialize_pose_transition(
+					Bone_offset_positions,
+					Bone_offset_velocities,
+					Bone_offset_rotations,
+					Bone_offset_angular_velocities,
+					Transition_src_position,
+					Transition_src_rotation,
+					Transition_dst_position,
+					Transition_dst_rotation,
+					Bone_positions(0),
+					Bone_velocities(0),
+					Bone_rotations(0),
+					Bone_angular_velocities(0),
+					Curr_bone_positions,
+					Curr_bone_velocities,
+					Curr_bone_rotations,
+					Curr_bone_angular_velocities,
+					Trns_bone_positions,
+					Trns_bone_velocities,
+					Trns_bone_rotations,
+					Trns_bone_angular_velocities);
+
+				Frame_index = best_index;
+			}
+		}
+
+		// Reset search timer
+		Search_timer = Search_time;
+	}
+
+
+
 
 
 }
