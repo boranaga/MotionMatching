@@ -131,6 +131,19 @@ protected: //Motion Matching 관련 variables
 	TArray<FVector> BasicCharatorVector;
 
 
+	// Camera
+	//Camera3D camera = { 0 }; //->raylib에서 사용하는 객체같은데 이 코드가 무엇을 의미하는 것일까
+	//camera.position = (Vector3){ 0.0f, 10.0f, 10.0f };
+	//camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
+	//camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+	//camera.fovy = 45.0f;
+	//camera.projection = CAMERA_PERSPECTIVE;
+
+	float Camera_azimuth = 0.0f;
+	float Camera_altitude = 0.4f;
+	float Camera_distance = 4.0f;
+
+
 	// Load Animation Data and build Matching Database
 	database DB; //database.bin과 features.bin 모두 DB에 저장됨
 
@@ -286,6 +299,9 @@ protected: //Motion Matching 관련 variables
 	UPROPERTY()
 	bool Desired_strafe = false;
 
+	FVector2D RightStickValue2D;
+	FVector2D LeftStickValue2D;
+
 
 
 public: //poseblemesh 관련
@@ -328,16 +344,41 @@ public: //Motion Matching 관련
 	void InputLog();
 
 
-	FVector2D RightStickValue;
-	FVector2D LeftStickValue;
-
 	//-------------------------------------------------------------------
 	//오렌지 덕의 controller.cpp에 정의되어 있는 함수들
+
+	float orbit_camera_update_azimuth(
+		const float azimuth,
+		const vec3 gamepadstick_right,
+		const bool desired_strafe,
+		const float dt);
 
 	/** Called for looking input */
 	void OnStrafe(const FInputActionValue& Value);
 
 	void OffStrafe(const FInputActionValue& Value);
+
+	void desired_gait_update(
+		float& desired_gait,
+		float& desired_gait_velocity,
+		const float dt,
+		const float gait_change_halflife);
+
+	vec3 desired_velocity_update(
+		const vec3 gamepadstick_left,
+		const float camera_azimuth,
+		const quat simulation_rotation,
+		const float fwrd_speed,
+		const float side_speed,
+		const float back_speed);
+
+	quat desired_rotation_update(
+		const quat desired_rotation,
+		const vec3 gamepadstick_left,
+		const vec3 gamepadstick_right,
+		const float camera_azimuth,
+		const bool desired_strafe,
+		const vec3 desired_velocity);
 
 	void inertialize_pose_reset(
 		slice1d<vec3> bone_offset_positions,
@@ -385,6 +426,78 @@ public: //Motion Matching 관련
 		const vec3 input_contact_position,
 		const vec3 input_contact_velocity,
 		const bool input_contact_state);
+
+	vec3 simulation_collide_obstacles(
+		const vec3 prev_pos,
+		const vec3 next_pos,
+		const slice1d<vec3> obstacles_positions,
+		const slice1d<vec3> obstacles_scales,
+		const float radius);
+
+
+	void simulation_positions_update(
+		vec3& position,
+		vec3& velocity,
+		vec3& acceleration,
+		const vec3 desired_velocity,
+		const float halflife,
+		const float dt,
+		const slice1d<vec3> obstacles_positions,
+		const slice1d<vec3> obstacles_scales);
+
+	void simulation_rotations_update(
+		quat& rotation,
+		vec3& angular_velocity,
+		const quat desired_rotation,
+		const float halflife,
+		const float dt);
+
+	void trajectory_desired_rotations_predict(
+		slice1d<quat> desired_rotations,
+		const slice1d<vec3> desired_velocities,
+		const quat desired_rotation,
+		const float camera_azimuth,
+		const vec3 gamepadstick_left,
+		const vec3 gamepadstick_right,
+		const bool desired_strafe,
+		const float dt);
+
+	void trajectory_rotations_predict(
+		slice1d<quat> rotations,
+		slice1d<vec3> angular_velocities,
+		const quat rotation,
+		const vec3 angular_velocity,
+		const slice1d<quat> desired_rotations,
+		const float halflife,
+		const float dt);
+
+	void trajectory_positions_predict(
+		slice1d<vec3> positions,
+		slice1d<vec3> velocities,
+		slice1d<vec3> accelerations,
+		const vec3 position,
+		const vec3 velocity,
+		const vec3 acceleration,
+		const slice1d<vec3> desired_velocities,
+		const float halflife,
+		const float dt,
+		const slice1d<vec3> obstacles_positions,
+		const slice1d<vec3> obstacles_scales);
+
+	void trajectory_desired_velocities_predict(
+		slice1d<vec3> desired_velocities,
+		const slice1d<quat> trajectory_rotations,
+		const vec3 desired_velocity,
+		const float camera_azimuth,
+		const vec3 gamepadstick_left,
+		const vec3 gamepadstick_right,
+		const bool desired_strafe,
+		const float fwrd_speed,
+		const float side_speed,
+		const float back_speed,
+		const float dt);
+
+
 
 
 public:
