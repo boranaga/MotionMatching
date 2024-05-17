@@ -942,18 +942,18 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 		simulation_back_speed,
 		20.0f * DeltaT);
 
-	//trajectory_positions_predict(
-	//	Trajectory_positions,
-	//	Trajectory_velocities,
-	//	Trajectory_accelerations,
-	//	Simulation_position,
-	//	Simulation_velocity,
-	//	Simulation_acceleration,
-	//	Trajectory_desired_velocities,
-	//	Simulation_velocity_halflife,
-	//	20.0f * DeltaT,
-	//	obstacles_positions,
-	//	obstacles_scales);
+	trajectory_positions_predict(
+		Trajectory_positions,
+		Trajectory_velocities,
+		Trajectory_accelerations,
+		Simulation_position,
+		Simulation_velocity,
+		Simulation_acceleration,
+		Trajectory_desired_velocities,
+		Simulation_velocity_halflife,
+		20.0f * DeltaT,
+		Obstacles_positions,
+		Obstacles_scales);
 
 
 

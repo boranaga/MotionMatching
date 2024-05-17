@@ -144,6 +144,12 @@ protected: //Motion Matching 관련 variables
 	float Camera_distance = 4.0f;
 
 
+	// Scene Obstacles
+	//일단 obstacle이 존재하지 않는다고 가정함
+	array1d<vec3> Obstacles_positions = array1d<vec3>(0);
+	array1d<vec3> Obstacles_scales = array1d<vec3>(0);
+
+
 	// Load Animation Data and build Matching Database
 	database DB; //database.bin과 features.bin 모두 DB에 저장됨
 
