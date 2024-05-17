@@ -56,6 +56,9 @@ class AMotionMatchingCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	/** Strafe Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* StrafeAction;
 
 public:
 	AMotionMatchingCharacter();
@@ -279,6 +282,11 @@ protected: //Motion Matching 관련 variables
 	//DeltTime(FrameRate)
 	float DeltaT = 1.0f / 60.0f; //dt
 
+	//Input Data
+	UPROPERTY()
+	bool Desired_strafe = false;
+
+
 
 public: //poseblemesh 관련
 
@@ -320,19 +328,16 @@ public: //Motion Matching 관련
 	void InputLog();
 
 
-
 	FVector2D RightStickValue;
 	FVector2D LeftStickValue;
-
-
-
-
-
 
 	//-------------------------------------------------------------------
 	//오렌지 덕의 controller.cpp에 정의되어 있는 함수들
 
-	vec3 gamepad_get_stick(int stick, const float deadzone);
+	/** Called for looking input */
+	void OnStrafe(const FInputActionValue& Value);
+
+	void OffStrafe(const FInputActionValue& Value);
 
 	void inertialize_pose_reset(
 		slice1d<vec3> bone_offset_positions,

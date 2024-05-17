@@ -26,7 +26,7 @@ protected:
 
 protected:
 	/** Strafe Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* StrafeAction;
 
 
@@ -35,8 +35,6 @@ protected:
 
 	void OffStrafe(const FInputActionValue& Value);
 
-
-	UPROPERTY()
 	bool Desired_strafe = false;
 
 };

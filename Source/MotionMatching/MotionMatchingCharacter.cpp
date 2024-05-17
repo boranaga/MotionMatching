@@ -126,6 +126,17 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 	InputLog();
 
 
+	// Strafe 동작 테스트 확인하고 지워도 됨
+	if (Desired_strafe == true)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Strafe ON!!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Strafe OFF!!"));
+	}
+
+
 }
 
 
@@ -147,6 +158,10 @@ void AMotionMatchingCharacter::SetupPlayerInputComponent(UInputComponent* Player
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMotionMatchingCharacter::Look);
+
+		// Strafe
+		EnhancedInputComponent->BindAction(StrafeAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::OnStrafe);
+		EnhancedInputComponent->BindAction(StrafeAction, ETriggerEvent::Completed, this, &AMotionMatchingCharacter::OffStrafe);
 	}
 	else
 	{
@@ -210,52 +225,15 @@ UPoseableMeshComponent* AMotionMatchingCharacter::GetMesh() const
 //---------------------------------------------------------------------
 //<controller.cpp에 정의되어 있는 함수들>
 
+void AMotionMatchingCharacter::OnStrafe(const FInputActionValue& Value)
+{
+	Desired_strafe = true;
+}
 
-// Basic functionality to get gamepad input including deadzone and 
-// squaring of the stick location to increase sensitivity. To make 
-// all the other code that uses this easier, we assume stick is 
-// oriented on floor (i.e. y-axis is zero)
-//vec3 AMotionMatchingCharacter::gamepad_get_stick(int stick, const float deadzone = 0.2f)
-//{
-//
-//	if (Controller != nullptr)
-//	{
-//		// find out which way is forward
-//		const FRotator Rotation = Controller->GetControlRotation();
-//		const FRotator YawRotation(0, Rotation.Yaw, 0);
-//
-//		// get forward vector
-//		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-//
-//		// get right vector 
-//		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-//	}
-//
-//	//------------------------------------------------------------------
-//	float gamepadx = GetGamepadAxisMovement(GAMEPAD_PLAYER, stick == GAMEPAD_STICK_LEFT ? GAMEPAD_AXIS_LEFT_X : GAMEPAD_AXIS_RIGHT_X);
-//	float gamepady = GetGamepadAxisMovement(GAMEPAD_PLAYER, stick == GAMEPAD_STICK_LEFT ? GAMEPAD_AXIS_LEFT_Y : GAMEPAD_AXIS_RIGHT_Y);
-//	float gamepadmag = sqrtf(gamepadx * gamepadx + gamepady * gamepady);
-//
-//	if (gamepadmag > deadzone)
-//	{
-//		float gamepaddirx = gamepadx / gamepadmag;
-//		float gamepaddiry = gamepady / gamepadmag;
-//		float gamepadclippedmag = gamepadmag > 1.0f ? 1.0f : gamepadmag * gamepadmag;
-//		gamepadx = gamepaddirx * gamepadclippedmag;
-//		gamepady = gamepaddiry * gamepadclippedmag;
-//	}
-//	else
-//	{
-//		gamepadx = 0.0f;
-//		gamepady = 0.0f;
-//	}
-//	//----------------------------------------------------------------------
-//
-//
-//
-//	return vec3(gamepadx, 0.0f, gamepady);
-//}
-
+void AMotionMatchingCharacter::OffStrafe(const FInputActionValue& Value)
+{
+	Desired_strafe = false;
+}
 
 
 
@@ -849,21 +827,21 @@ void AMotionMatchingCharacter::InputLog()
 		}
 	}
 
-	
-	////좌측 조이스틱(이동) 키를 입력하지 않으면 입력값 초기화.
-	//APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-	//if (PlayerController)
+
+	Cast<APlayerController>(Controller)->IsInputKeyDown(EKeys::A)
+
+
+
+
+	//// Strafe 동작 테스트 확인하고 지워도 됨
+	//if (Desired_strafe == true)
 	//{
-	//	if (!PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Down) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Up)
-	//		&& !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Left) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Right))
-	//	{
-	//		LeftStickValue = FVector2D(0, 0);
-	//	}
+	//	UE_LOG(LogTemp, Log, TEXT("Strafe ON!!"));
 	//}
-
-
-
-
+	//else
+	//{
+	//	UE_LOG(LogTemp, Log, TEXT("Strafe OFF!!"));
+	//}
 
 
 }
