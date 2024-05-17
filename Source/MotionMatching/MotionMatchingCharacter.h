@@ -276,6 +276,8 @@ protected: //Motion Matching 관련 variables
 	array1d<float> Latent_proj = array1d<float>(32);
 	array1d<float> Latent_curr = array1d<float>(32);
 
+	//DeltTime(FrameRate)
+	float DeltaT = 1.0f / 60.0f; //dt
 
 
 public: //poseblemesh 관련
@@ -318,6 +320,9 @@ public: //Motion Matching 관련
 
 	//-------------------------------------------------------------------
 	//오렌지 덕의 controller.cpp에 정의되어 있는 함수들
+
+	vec3 gamepad_get_stick(int stick, const float deadzone);
+
 	void inertialize_pose_reset(
 		slice1d<vec3> bone_offset_positions,
 		slice1d<vec3> bone_offset_velocities,
@@ -377,4 +382,17 @@ public:
 	UFUNCTION()
 	void SetCharacterRotationRest(); //캐릭터의 rotation을 bone_rest_rotations으로 설정
 
+};
+
+
+//------------------------------------------------------------
+enum
+{
+	GAMEPAD_PLAYER = 0,
+};
+
+enum
+{
+	GAMEPAD_STICK_LEFT, //0
+	GAMEPAD_STICK_RIGHT, //1
 };

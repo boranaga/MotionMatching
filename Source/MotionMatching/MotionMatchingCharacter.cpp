@@ -111,7 +111,7 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 
 	Super::Tick(DeltaTime);
 
-
+	//-------------------------------------------------------------
 	//Tick 함수가 잘 작동하는지 테스트
 	//초 단위로 출력
 	TickTime += DeltaTime;
@@ -120,6 +120,9 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 		TimePassed += 1;
 		TickTime = 0.0f;
 	}
+	//-------------------------------------------------------------
+
+
 
 }
 
@@ -204,6 +207,43 @@ UPoseableMeshComponent* AMotionMatchingCharacter::GetMesh() const
 
 //---------------------------------------------------------------------
 //<controller.cpp에 정의되어 있는 함수들>
+
+
+// Basic functionality to get gamepad input including deadzone and 
+// squaring of the stick location to increase sensitivity. To make 
+// all the other code that uses this easier, we assume stick is 
+// oriented on floor (i.e. y-axis is zero)
+//vec3 AMotionMatchingCharacter::gamepad_get_stick(int stick, const float deadzone = 0.2f)
+//{
+//	
+//	AMotionMatchingCharacter::controller
+//
+//	//------------------------------------------------------------------
+//	float gamepadx = GetGamepadAxisMovement(GAMEPAD_PLAYER, stick == GAMEPAD_STICK_LEFT ? GAMEPAD_AXIS_LEFT_X : GAMEPAD_AXIS_RIGHT_X);
+//	float gamepady = GetGamepadAxisMovement(GAMEPAD_PLAYER, stick == GAMEPAD_STICK_LEFT ? GAMEPAD_AXIS_LEFT_Y : GAMEPAD_AXIS_RIGHT_Y);
+//	float gamepadmag = sqrtf(gamepadx * gamepadx + gamepady * gamepady);
+//
+//	if (gamepadmag > deadzone)
+//	{
+//		float gamepaddirx = gamepadx / gamepadmag;
+//		float gamepaddiry = gamepady / gamepadmag;
+//		float gamepadclippedmag = gamepadmag > 1.0f ? 1.0f : gamepadmag * gamepadmag;
+//		gamepadx = gamepaddirx * gamepadclippedmag;
+//		gamepady = gamepaddiry * gamepadclippedmag;
+//	}
+//	else
+//	{
+//		gamepadx = 0.0f;
+//		gamepady = 0.0f;
+//	}
+//	//----------------------------------------------------------------------
+//
+//
+//
+//	return vec3(gamepadx, 0.0f, gamepady);
+//}
+
+
 
 
 void AMotionMatchingCharacter::inertialize_pose_reset(
@@ -530,15 +570,15 @@ void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 
 }
 
-
-
-
-
-
-
 void AMotionMatchingCharacter::MotionMatchingMainTick() {
 
-	//모션 매칭의 본격적인 내용이 들어갈 예정임
+	// Get gamepad stick states
+	//vec3 gamepadstick_left = gamepad_get_stick(GAMEPAD_STICK_LEFT);
+	//vec3 gamepadstick_right = gamepad_get_stick(GAMEPAD_STICK_RIGHT);
+
+	// Get if strafe is desired
+	//bool desired_strafe = desired_strafe_update();
+
 
 }
 
