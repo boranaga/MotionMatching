@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 
+#include "Kismet/GameplayStatics.h" //GetPlyaerController 함수 불러오려고 추가함
 
 #include "Components/PoseableMeshComponent.h"
 
@@ -121,7 +122,8 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 		TickTime = 0.0f;
 	}
 	//-------------------------------------------------------------
-
+	//Input이 잘 작동하는지 테스트
+	InputLog();
 
 
 }
@@ -215,8 +217,19 @@ UPoseableMeshComponent* AMotionMatchingCharacter::GetMesh() const
 // oriented on floor (i.e. y-axis is zero)
 //vec3 AMotionMatchingCharacter::gamepad_get_stick(int stick, const float deadzone = 0.2f)
 //{
-//	
-//	AMotionMatchingCharacter::controller
+//
+//	if (Controller != nullptr)
+//	{
+//		// find out which way is forward
+//		const FRotator Rotation = Controller->GetControlRotation();
+//		const FRotator YawRotation(0, Rotation.Yaw, 0);
+//
+//		// get forward vector
+//		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+//
+//		// get right vector 
+//		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+//	}
 //
 //	//------------------------------------------------------------------
 //	float gamepadx = GetGamepadAxisMovement(GAMEPAD_PLAYER, stick == GAMEPAD_STICK_LEFT ? GAMEPAD_AXIS_LEFT_X : GAMEPAD_AXIS_RIGHT_X);
@@ -784,4 +797,73 @@ void AMotionMatchingCharacter::PoseTestByPostion(int frameindex) {
 
 		GetMesh()->SetBoneLocationByName(FName(JointsNames[i]), Position, EBoneSpaces::ComponentSpace);
 	}
+}
+
+
+
+//Input Log Test
+void AMotionMatchingCharacter::InputLog() 
+{
+	if (Controller != nullptr)
+	{
+		// find out which way is forward
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		// get forward vector
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		// get right vector 
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+
+		UE_LOG(LogTemp, Log, TEXT("ForwardDirection: "));
+		UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), ForwardDirection.X, ForwardDirection.Y, ForwardDirection.Z);
+
+		UE_LOG(LogTemp, Log, TEXT("RightDirection: "));
+		UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), RightDirection.X, RightDirection.Y, RightDirection.Z);
+	}
+
+	//-------------------------------------------
+	//키보드 입력 부분
+
+	//Add Input Mapping Context
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+
+		if (PlayerController->IsInputKeyDown(EKeys::A)) {
+			UE_LOG(LogTemp, Log, TEXT("A is pressed"));
+		}
+		if (PlayerController->IsInputKeyDown(EKeys::S)) {
+			UE_LOG(LogTemp, Log, TEXT("S is pressed"));
+		}
+		if (PlayerController->IsInputKeyDown(EKeys::D)) {
+			UE_LOG(LogTemp, Log, TEXT("D is pressed"));
+		}
+		if (PlayerController->IsInputKeyDown(EKeys::W)) {
+			UE_LOG(LogTemp, Log, TEXT("W is pressed"));
+		}
+	}
+
+	
+	////좌측 조이스틱(이동) 키를 입력하지 않으면 입력값 초기화.
+	//APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	//if (PlayerController)
+	//{
+	//	if (!PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Down) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Up)
+	//		&& !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Left) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Right))
+	//	{
+	//		LeftStickValue = FVector2D(0, 0);
+	//	}
+	//}
+
+
+
+
+
+
 }

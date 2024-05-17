@@ -313,9 +313,20 @@ public: //Motion Matching 관련
 	UFUNCTION()
 	void SaveBasicVectors(); //캐릭터 스켈레톤의 기본 Vector 값 저장
 
-
 	UFUNCTION()
 	void DataBaseLog();
+
+	UFUNCTION()
+	void InputLog();
+
+
+
+	FVector2D RightStickValue;
+	FVector2D LeftStickValue;
+
+
+
+
 
 
 	//-------------------------------------------------------------------
