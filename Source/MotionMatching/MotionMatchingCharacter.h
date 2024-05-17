@@ -77,6 +77,14 @@ protected:
 	// To add mapping context
 	virtual void BeginPlay();
 
+	// Tick 함수
+	virtual void Tick(float DeltaTime) override; //override를 안하고 그냥 사용은 안되나?
+
+	//매초마다 이벤트를 발생시키게 하기 위한 타이머
+	float TickTime;
+	int TimePassed;
+
+
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

@@ -71,6 +71,9 @@ void AMotionMatchingCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	// Tick 함수 등록
+	PrimaryActorTick.bCanEverTick = true;
+
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -83,6 +86,9 @@ void AMotionMatchingCharacter::BeginPlay()
 
 
 	//---------------------------------------------------
+
+	TickTime = 0.0f; //Tick timer를 0으로 초기화
+	TimePassed = 0;
 	
 	//Character skeleton의 기본 roator 값을 배열로 저장
 	SaveBasicRotators();
@@ -99,6 +105,25 @@ void AMotionMatchingCharacter::BeginPlay()
 	DataBaseLog();
 
 }
+
+
+void AMotionMatchingCharacter::Tick(float DeltaTime) {
+
+	Super::Tick(DeltaTime);
+
+
+	//Tick 함수가 잘 작동하는지 테스트
+	//초 단위로 출력
+	TickTime += DeltaTime;
+	if (TickTime >= 1) {
+		UE_LOG(LogTemp, Log, TEXT("%d Seconds has passed."), TimePassed);
+		TimePassed += 1;
+		TickTime = 0.0f;
+	}
+
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////
 // Input
