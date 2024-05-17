@@ -438,71 +438,6 @@ void AMotionMatchingCharacter::inertialize_pose_update(
 	}
 }
 
-//--------------------------------------
-
-// Copy a part of a feature vector from the 
-// matching database into the query feature vector
-void AMotionMatchingCharacter::query_copy_denormalized_feature(
-	slice1d<float> query,
-	int& offset,
-	const int size,
-	const slice1d<float> features,
-	const slice1d<float> features_offset,
-	const slice1d<float> features_scale)
-{
-	for (int i = 0; i < size; i++)
-	{
-		query(offset + i) = features(offset + i) * features_scale(offset + i) + features_offset(offset + i);
-	}
-
-	offset += size;
-}
-
-// Compute the query feature vector for the current 
-// trajectory controlled by the gamepad.
-void AMotionMatchingCharacter::query_compute_trajectory_position_feature(
-	slice1d<float> query,
-	int& offset,
-	const vec3 root_position,
-	const quat root_rotation,
-	const slice1d<vec3> trajectory_positions)
-{
-	vec3 traj0 = quat_inv_mul_vec3(root_rotation, trajectory_positions(1) - root_position);
-	vec3 traj1 = quat_inv_mul_vec3(root_rotation, trajectory_positions(2) - root_position);
-	vec3 traj2 = quat_inv_mul_vec3(root_rotation, trajectory_positions(3) - root_position);
-
-	query(offset + 0) = traj0.x;
-	query(offset + 1) = traj0.z;
-	query(offset + 2) = traj1.x;
-	query(offset + 3) = traj1.z;
-	query(offset + 4) = traj2.x;
-	query(offset + 5) = traj2.z;
-
-	offset += 6;
-}
-
-// Same but for the trajectory direction
-void AMotionMatchingCharacter::query_compute_trajectory_direction_feature(
-	slice1d<float> query,
-	int& offset,
-	const quat root_rotation,
-	const slice1d<quat> trajectory_rotations)
-{
-	vec3 traj0 = quat_inv_mul_vec3(root_rotation, quat_mul_vec3(trajectory_rotations(1), vec3(0, 0, 1)));
-	vec3 traj1 = quat_inv_mul_vec3(root_rotation, quat_mul_vec3(trajectory_rotations(2), vec3(0, 0, 1)));
-	vec3 traj2 = quat_inv_mul_vec3(root_rotation, quat_mul_vec3(trajectory_rotations(3), vec3(0, 0, 1)));
-
-	query(offset + 0) = traj0.x;
-	query(offset + 1) = traj0.z;
-	query(offset + 2) = traj1.x;
-	query(offset + 3) = traj1.z;
-	query(offset + 4) = traj2.x;
-	query(offset + 5) = traj2.z;
-
-	offset += 6;
-}
-
-
 void AMotionMatchingCharacter::contact_reset(
 	bool& contact_state,
 	bool& contact_lock,
@@ -1021,30 +956,6 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 		Obstacles_scales);
 
 
-	// Make query vector for search.
-	// In theory this only needs to be done when a search is 
-	// actually required however for visualization purposes it
-	// can be nice to do it every frame
-	array1d<float> query(DB.nfeatures());
-
-	// Compute the features of the query vector
-	slice1d<float> query_features = LMM_enabled ? slice1d<float>(Features_curr) : DB.features(Frame_index);
-
-	int offset = 0;
-	query_copy_denormalized_feature(query, offset, 3, query_features, DB.features_offset, DB.features_scale); // Left Foot Position
-	query_copy_denormalized_feature(query, offset, 3, query_features, DB.features_offset, DB.features_scale); // Right Foot Position
-	query_copy_denormalized_feature(query, offset, 3, query_features, DB.features_offset, DB.features_scale); // Left Foot Velocity
-	query_copy_denormalized_feature(query, offset, 3, query_features, DB.features_offset, DB.features_scale); // Right Foot Velocity
-	query_copy_denormalized_feature(query, offset, 3, query_features, DB.features_offset, DB.features_scale); // Hip Velocity
-	query_compute_trajectory_position_feature(query, offset, Bone_positions(0), Bone_rotations(0), Trajectory_positions);
-	query_compute_trajectory_direction_feature(query, offset, Bone_rotations(0), Trajectory_rotations);
-
-	assert(offset == DB.nfeatures());
-
-	// Check if we reached the end of the current anim
-	bool end_of_anim = database_trajectory_index_clamp(DB, Frame_index, 1) == Frame_index; //MMdatabase에 정의되어 있음
-
-	
 
 
 }

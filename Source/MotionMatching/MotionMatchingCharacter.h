@@ -419,33 +419,6 @@ public: //Motion Matching ฐüทร
 		const float halflife,
 		const float dt);
 
-	//--------------------------------------
-	// Copy a part of a feature vector from the 
-	// matching database into the query feature vector
-	void query_copy_denormalized_feature(
-		slice1d<float> query,
-		int& offset,
-		const int size,
-		const slice1d<float> features,
-		const slice1d<float> features_offset,
-		const slice1d<float> features_scale);
-	
-	// Compute the query feature vector for the current 
-	// trajectory controlled by the gamepad.
-	void query_compute_trajectory_position_feature(
-		slice1d<float> query,
-		int& offset,
-		const vec3 root_position,
-		const quat root_rotation,
-		const slice1d<vec3> trajectory_positions);
-
-	// Same but for the trajectory direction
-	void query_compute_trajectory_direction_feature(
-		slice1d<float> query,
-		int& offset,
-		const quat root_rotation,
-		const slice1d<quat> trajectory_rotations);
-	
 
 	void contact_reset(
 		bool& contact_state,
