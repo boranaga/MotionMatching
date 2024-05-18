@@ -100,12 +100,6 @@ protected:
 
 	void TapKeyDown();
 
-
-	// 메뉴옵션
-	bool IsTabButtonDown = false;
-
-			
-
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -347,6 +341,8 @@ protected: //Motion Matching 관련 variables
 
 	bool CamZoomIn = false;
 	bool CamZoomOut = false;
+
+	bool IsTabButtonDown = false; //Menu
 
 	FVector2D RightStickValue2D;
 	FVector2D LeftStickValue2D;
