@@ -90,9 +90,6 @@ void AJWCharacter::DisPlayMenu()
 
 
 
-
-
-
 //void AJWCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 //{
 //	Super::SetupPlayerInputComponent(PlayerInputComponent);
