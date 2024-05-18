@@ -26,11 +26,11 @@ protected:
 
 protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* MenuAction;
-	void DisPlayMenu();
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	//UInputAction* MenuAction;
 
-	bool IsTabButtonDown = false;
+	//void TapKeyDown();
+	//bool IsTabButtonDown = false;
 
 	/** StrafeInput Action */
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))

@@ -67,6 +67,8 @@ class AMotionMatchingCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ZoomOutAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* MenuAction;
 
 
 public:
@@ -96,6 +98,11 @@ protected:
 
 	void CamZoomOutOff(const FInputActionValue& Value);
 
+	void TapKeyDown();
+
+
+	// 메뉴옵션
+	bool IsTabButtonDown = false;
 
 			
 
@@ -274,6 +281,7 @@ protected: //Motion Matching 관련 variables
 	array1d<quat> Trajectory_rotations = array1d<quat>(4);
 	array1d<vec3> Trajectory_angular_velocities = array1d<vec3>(4);
 
+	
 	// Synchronization
 	bool Synchronization_enabled;
 	float Synchronization_data_factor = 1.0f;

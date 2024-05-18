@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "MMPlayerController.h"
 
 #include "Kismet/GameplayStatics.h" //GetPlyaerController 함수 불러오려고 추가함
 
@@ -127,6 +128,42 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 
 	MotionMatchingMainTick();
 
+	if (LMM_enabled)
+	{
+		UE_LOG(LogTemp, Log, TEXT("LMM ON"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("LMM OFF"));
+	}
+
+	if (Ik_enabled)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Ik_enabled ON"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Ik_enabled OFF"));
+	}
+
+	if (Adjustment_enabled)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Adjustment_enabled ON"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Adjustment_enabled OFF"));
+	}
+
+	if (Clamping_enabled)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Clamping_enabled ON"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Clamping_enabled OFF"));
+	}
+
 }
 
 
@@ -159,6 +196,9 @@ void AMotionMatchingCharacter::SetupPlayerInputComponent(UInputComponent* Player
 
 		EnhancedInputComponent->BindAction(ZoomOutAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::CamZoomOutOn);
 		EnhancedInputComponent->BindAction(ZoomOutAction, ETriggerEvent::Completed, this, &AMotionMatchingCharacter::CamZoomOutOff);
+
+		// MenuUI
+		EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::TapKeyDown);
 
 	}
 	else
@@ -261,6 +301,17 @@ void AMotionMatchingCharacter::CamZoomOutOn(const FInputActionValue& Value)
 void AMotionMatchingCharacter::CamZoomOutOff(const FInputActionValue& Value)
 {
 	CamZoomOut = false;
+}
+
+void AMotionMatchingCharacter::TapKeyDown()
+{
+	AMMPlayerController* PlayerController = Cast<AMMPlayerController>(Controller);
+	IsTabButtonDown = !IsTabButtonDown;
+
+	if (PlayerController)
+	{
+		PlayerController->ViewMenu(IsTabButtonDown);
+	}
 }
 
 

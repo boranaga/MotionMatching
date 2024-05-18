@@ -18,14 +18,15 @@ void AJWCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Triggered, this, &AJWCharacter::DisPlayMenu);
-	}
-	else
-	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
-	}
+	//if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
+	//	EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Triggered, this, &AJWCharacter::TapKeyDown);
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	//}
 }
+
 void AJWCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -72,21 +73,21 @@ void AJWCharacter::Tick(float DeltaTime)
 	}
 }
 
-void AJWCharacter::DisPlayMenu()
-{
-	AMMPlayerController* PlayerController = Cast<AMMPlayerController>(Controller);
-	IsTabButtonDown = !IsTabButtonDown;
-
-	if(PlayerController)
-	{
-		PlayerController->ViewMenu(IsTabButtonDown);
-
-	}
-}
-
+//void AJWCharacter::TapKeyDown()
+//{
+//	AMMPlayerController* PlayerController = Cast<AMMPlayerController>(Controller);
+//	IsTabButtonDown = !IsTabButtonDown;
+//
+//	if(PlayerController)
+//	{
+//		PlayerController->ViewMenu(IsTabButtonDown);
+//	}
+//}
 
 
 
+//////////////////////////////// 작업 완료 ///////////////////////////////////////////////
+//------------------------------------------------------------------------------------//
 
 
 
