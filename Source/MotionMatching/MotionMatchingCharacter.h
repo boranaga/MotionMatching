@@ -167,11 +167,11 @@ protected: //Motion Matching 관련 variables
 	// Camera
 	//Camera3D camera = { 0 }; //->raylib에서 사용하는 객체같은데 이 코드(" { 0 } ")가 무엇을 의미하는 것일까
 	// -> 언리얼의 카메라 객체에 접근하자
-	//camera.position = (Vector3){ 0.0f, 10.0f, 10.0f };
-	//camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
-	//camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-	//camera.fovy = 45.0f;
-	//camera.projection = CAMERA_PERSPECTIVE;
+	//camera.position = (Vector3){ 0.0f, 10.0f, 10.0f }; //나중에 기본(시작) 값 설정하는 함수 만들 예정임 
+	//camera.target = (Vector3){ 0.0f, 0.0f, 0.0f }; //나중에 기본(시작) 값 설정하는 함수 만들 예정임
+	//camera.up = (Vector3){ 0.0f, 1.0f, 0.0f }; //필요 없음
+	//camera.fovy = 45.0f; //필요 없음
+	//camera.projection = CAMERA_PERSPECTIVE; //필요 없음
 
 
 	float Camera_azimuth = 0.0f;
@@ -254,7 +254,7 @@ protected: //Motion Matching 관련 variables
 	float Desired_gait = 0.0f;
 	float Desired_gait_velocity = 0.0f;
 
-	vec3 Simulation_position;
+	vec3 Simulation_position = vec3(0, 0.9f, 0); //초기 값 설정 //(x, y, z) -> (z, x, y)로 변함
 	vec3 Simulation_velocity;
 	vec3 Simulation_acceleration;
 	quat Simulation_rotation;
@@ -391,6 +391,12 @@ public: //Motion Matching 관련
 
 	UFUNCTION()
 	void InputLog();
+	
+	//-------------------------------------------------------------------
+	//Set Simulation object, Set Animation
+	void SetSimulationObj();
+	void SetCharacterAnimation();
+
 
 
 	//-------------------------------------------------------------------
