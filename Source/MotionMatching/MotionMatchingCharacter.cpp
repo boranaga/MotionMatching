@@ -125,6 +125,8 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 	//Input이 잘 작동하는지 테스트
 	InputLog();
 
+	MotionMatchingMainTick();
+
 }
 
 
@@ -150,6 +152,14 @@ void AMotionMatchingCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		// Strafe
 		EnhancedInputComponent->BindAction(StrafeAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::OnStrafe);
 		EnhancedInputComponent->BindAction(StrafeAction, ETriggerEvent::Completed, this, &AMotionMatchingCharacter::OffStrafe);
+
+		// Zomm
+		EnhancedInputComponent->BindAction(ZoomInAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::CamZoomInOn);
+		EnhancedInputComponent->BindAction(ZoomInAction, ETriggerEvent::Completed, this, &AMotionMatchingCharacter::CamZoomInOff);
+
+		EnhancedInputComponent->BindAction(ZoomOutAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::CamZoomOutOn);
+		EnhancedInputComponent->BindAction(ZoomOutAction, ETriggerEvent::Completed, this, &AMotionMatchingCharacter::CamZoomOutOff);
+
 	}
 	else
 	{
@@ -189,12 +199,14 @@ void AMotionMatchingCharacter::Look(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
-	{
-		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
-	}
+
+	//잠시 꺼뒀음
+	//if (Controller != nullptr)
+	//{
+	//	// add yaw and pitch input to controller
+	//	AddControllerYawInput(LookAxisVector.X);
+	//	AddControllerPitchInput(LookAxisVector.Y);
+	//}
 
 
 	// Gamepad Right stick vector 2d value
@@ -221,17 +233,6 @@ UPoseableMeshComponent* AMotionMatchingCharacter::GetMesh() const
 //---------------------------------------------------------------------
 //<controller.cpp에 정의되어 있는 함수들>
 
-float AMotionMatchingCharacter::orbit_camera_update_azimuth(
-	const float azimuth,
-	const vec3 gamepadstick_right,
-	const bool desired_strafe,
-	const float dt)
-{
-	vec3 gamepadaxis = desired_strafe ? vec3() : gamepadstick_right;
-	return azimuth + 2.0f * dt * -gamepadaxis.x;
-}
-
-
 void AMotionMatchingCharacter::OnStrafe(const FInputActionValue& Value)
 {
 	Desired_strafe = true;
@@ -241,6 +242,117 @@ void AMotionMatchingCharacter::OffStrafe(const FInputActionValue& Value)
 {
 	Desired_strafe = false;
 }
+
+void AMotionMatchingCharacter::CamZoomInOn(const FInputActionValue& Value)
+{
+	CamZoomIn = true;
+}
+
+void AMotionMatchingCharacter::CamZoomInOff(const FInputActionValue& Value)
+{
+	CamZoomIn = false;
+}
+
+void AMotionMatchingCharacter::CamZoomOutOn(const FInputActionValue& Value)
+{
+	CamZoomOut = true;
+}
+
+void AMotionMatchingCharacter::CamZoomOutOff(const FInputActionValue& Value)
+{
+	CamZoomOut = false;
+}
+
+
+float AMotionMatchingCharacter::orbit_camera_update_azimuth(
+	const float azimuth,
+	const vec3 gamepadstick_right,
+	const bool desired_strafe,
+	const float dt)
+{
+	float speed = 5;
+
+	vec3 gamepadaxis = desired_strafe ? vec3() : gamepadstick_right;
+	return azimuth + 2.0f * dt * -gamepadaxis.x * speed * (-1);
+}
+
+float AMotionMatchingCharacter::orbit_camera_update_altitude(
+	const float altitude,
+	const vec3 gamepadstick_right,
+	const bool desired_strafe,
+	const float dt)
+{
+	float speed = 5;
+
+	vec3 gamepadaxis = desired_strafe ? vec3() : gamepadstick_right;
+	return clampf(altitude + 2.0f * dt * gamepadaxis.z * speed * (-1), 0.0, 0.4f * PIf);
+}
+
+
+float AMotionMatchingCharacter::orbit_camera_update_distance(
+	const float distance,
+	const float dt)
+{
+	float scale = 100;
+
+	float gamepadzoom =
+		CamZoomOut ? +1.0f :
+		CamZoomIn ? -1.0f : 0.0f;
+
+	return clampf(distance + 10.0f * dt * gamepadzoom * scale, 100.0f, 10000.0f);
+}
+
+// Updates the camera using the orbit cam controls
+void AMotionMatchingCharacter::orbit_camera_update(
+	//Camera3D& cam,
+	float& camera_azimuth,
+	float& camera_altitude,
+	float& camera_distance,
+	//const vec3 target,
+	const vec3 gamepadstick_right,
+	const bool desired_strafe,
+	const float dt
+)
+{
+	camera_azimuth = orbit_camera_update_azimuth(camera_azimuth, gamepadstick_right, desired_strafe, dt);
+	camera_altitude = orbit_camera_update_altitude(camera_altitude, gamepadstick_right, desired_strafe, dt);
+	camera_distance = orbit_camera_update_distance(camera_distance, dt);
+
+	//quat rotation_azimuth = quat_from_angle_axis(camera_azimuth, vec3(0, 1, 0));
+	quat rotation_azimuth = quat_from_angle_axis(camera_azimuth, vec3(0, 0, 1)); //언리얼에서는 (0, 0, 1)을 기준으로 함
+
+	//vec3 position = quat_mul_vec3(rotation_azimuth, vec3(0, 0, camera_distance));
+	vec3 position = quat_mul_vec3(rotation_azimuth, vec3(0, camera_distance, 0));
+	//vec3 axis = normalize(cross(position, vec3(0, 1, 0)));
+	vec3 axis = normalize(cross(position, vec3(0, 0, 1)));
+
+	quat rotation_altitude = quat_from_angle_axis(camera_altitude, axis);
+
+	//vec3 eye = target + quat_mul_vec3(rotation_altitude, position);
+
+	//cam.target = (Vector3){ target.x, target.y, target.z };
+	//cam.position = (Vector3){ eye.x, eye.y, eye.z };
+
+	//---------------------------------------------------------------------------
+	FVector CamWorldPos = FollowCamera->GetComponentLocation();
+	FVector CharacterWorldPos = GetActorLocation();
+
+
+	//vec3 target = vec3(CharacterWorldPos.X, CharacterWorldPos.Y, CharacterWorldPos.Z);
+	vec3 target = vec3(CharacterWorldPos.Y, CharacterWorldPos.X, CharacterWorldPos.Z * (1) ); //마찬가지로 좌표계를 언리얼에 맞게 변환시켜야함
+	vec3 eye = target + quat_mul_vec3(rotation_altitude, position);
+	//FVector NewCamPos(eye.x, eye.y, eye.z);
+	FVector NewCamPos(eye.y, eye.x, eye.z * (1)); //언리얼에 맞게 좌표계 변환
+	FVector CamLookAtVec = CharacterWorldPos - NewCamPos;
+	
+	FollowCamera->SetWorldRotation(CamLookAtVec.Rotation());
+
+	//FollowCamera->SetRelativeRotation(CamLookAtVec.Rotation());
+
+
+	FollowCamera->SetWorldLocation(NewCamPos); //카메라를 새로운 위치로 업데이트
+}
+
 
 void AMotionMatchingCharacter::desired_gait_update(
 	float& desired_gait,
@@ -321,6 +433,47 @@ quat AMotionMatchingCharacter::desired_rotation_update(
 		return desired_rotation_curr;
 	}
 }
+
+
+// Moving the root is a little bit difficult when we have the
+// inertializer set up in the way we do. Essentially we need
+// to also make sure to adjust all of the locations where 
+// we are transforming the data to and from as well as the 
+// offsets being blended out
+void inertialize_root_adjust(
+	vec3& offset_position,
+	vec3& transition_src_position,
+	quat& transition_src_rotation,
+	vec3& transition_dst_position,
+	quat& transition_dst_rotation,
+	vec3& position,
+	quat& rotation,
+	const vec3 input_position,
+	const quat input_rotation)
+{
+	// Find the position difference and add it to the state and transition location
+	vec3 position_difference = input_position - position;
+	position = position_difference + position;
+	transition_dst_position = position_difference + transition_dst_position;
+
+	// Find the point at which we want to now transition from in the src data
+	transition_src_position = transition_src_position + quat_mul_vec3(transition_src_rotation,
+		quat_inv_mul_vec3(transition_dst_rotation, position - offset_position - transition_dst_position));
+	transition_dst_position = position;
+	offset_position = vec3();
+
+	// Find the rotation difference. We need to normalize here or some error can accumulate 
+	// over time during adjustment.
+	quat rotation_difference = quat_normalize(quat_mul_inv(input_rotation, rotation));
+
+	// Apply the rotation difference to the current rotation and transition location
+	rotation = quat_mul(rotation_difference, rotation);
+	transition_dst_rotation = quat_mul(rotation_difference, transition_dst_rotation);
+}
+
+
+
+
 
 
 void AMotionMatchingCharacter::inertialize_pose_reset(
@@ -611,6 +764,168 @@ void AMotionMatchingCharacter::contact_reset(
 	contact_offset_velocity = vec3();
 }
 
+
+void AMotionMatchingCharacter::contact_update(
+	bool& contact_state,
+	bool& contact_lock,
+	vec3& contact_position,
+	vec3& contact_velocity,
+	vec3& contact_point,
+	vec3& contact_target,
+	vec3& contact_offset_position,
+	vec3& contact_offset_velocity,
+	const vec3 input_contact_position,
+	const bool input_contact_state,
+	const float unlock_radius,
+	const float foot_height,
+	const float halflife,
+	const float dt,
+	const float eps = 1e-8)
+{
+	// First compute the input contact position velocity via finite difference
+	vec3 input_contact_velocity =
+		(input_contact_position - contact_target) / (dt + eps);
+	contact_target = input_contact_position;
+
+	// Update the inertializer to tick forward in time
+	inertialize_update(
+		contact_position,
+		contact_velocity,
+		contact_offset_position,
+		contact_offset_velocity,
+		// If locked we feed the contact point and zero velocity, 
+		// otherwise we feed the input from the animation
+		contact_lock ? contact_point : input_contact_position,
+		contact_lock ? vec3() : input_contact_velocity,
+		halflife,
+		dt);
+
+	// If the contact point is too far from the current input position 
+	// then we need to unlock the contact
+	bool unlock_contact = contact_lock && (
+		length(contact_point - input_contact_position) > unlock_radius);
+
+	// If the contact was previously inactive but is now active we 
+	// need to transition to the locked contact state
+	if (!contact_state && input_contact_state)
+	{
+		// Contact point is given by the current position of 
+		// the foot projected onto the ground plus foot height
+		contact_lock = true;
+		contact_point = contact_position;
+		contact_point.y = foot_height;
+
+		inertialize_transition(
+			contact_offset_position,
+			contact_offset_velocity,
+			input_contact_position,
+			input_contact_velocity,
+			contact_point,
+			vec3());
+	}
+
+	// Otherwise if we need to unlock or we were previously in 
+	// contact but are no longer we transition to just taking 
+	// the input position as-is
+	else if ((contact_lock && contact_state && !input_contact_state)
+		|| unlock_contact)
+	{
+		contact_lock = false;
+
+		inertialize_transition(
+			contact_offset_position,
+			contact_offset_velocity,
+			contact_point,
+			vec3(),
+			input_contact_position,
+			input_contact_velocity);
+	}
+
+	// Update contact state
+	contact_state = input_contact_state;
+}
+
+//--------------------------------------
+// Rotate a joint to look toward some 
+// given target position
+void AMotionMatchingCharacter::ik_look_at(
+	quat& bone_rotation,
+	const quat global_parent_rotation,
+	const quat global_rotation,
+	const vec3 global_position,
+	const vec3 child_position,
+	const vec3 target_position,
+	const float eps = 1e-5f)
+{
+	vec3 curr_dir = normalize(child_position - global_position);
+	vec3 targ_dir = normalize(target_position - global_position);
+
+	if (fabs(1.0f - dot(curr_dir, targ_dir) > eps))
+	{
+		bone_rotation = quat_inv_mul(global_parent_rotation,
+			quat_mul(quat_between(curr_dir, targ_dir), global_rotation));
+	}
+}
+
+// Basic two-joint IK in the style of https://theorangeduck.com/page/simple-two-joint
+// Here I add a basic "forward vector" which acts like a kind of pole-vetor
+// to control the bending direction
+void AMotionMatchingCharacter::ik_two_bone(
+	quat& bone_root_lr,
+	quat& bone_mid_lr,
+	const vec3 bone_root,
+	const vec3 bone_mid,
+	const vec3 bone_end,
+	const vec3 target,
+	const vec3 fwd,
+	const quat bone_root_gr,
+	const quat bone_mid_gr,
+	const quat bone_par_gr,
+	const float max_length_buffer) {
+
+	float max_extension =
+		length(bone_root - bone_mid) +
+		length(bone_mid - bone_end) -
+		max_length_buffer;
+
+	vec3 target_clamp = target;
+	if (length(target - bone_root) > max_extension)
+	{
+		target_clamp = bone_root + max_extension * normalize(target - bone_root);
+	}
+
+	vec3 axis_dwn = normalize(bone_end - bone_root);
+	vec3 axis_rot = normalize(cross(axis_dwn, fwd));
+
+	vec3 a = bone_root;
+	vec3 b = bone_mid;
+	vec3 c = bone_end;
+	vec3 t = target_clamp;
+
+	float lab = length(b - a);
+	float lcb = length(b - c);
+	float lat = length(t - a);
+
+	float ac_ab_0 = acosf(clampf(dot(normalize(c - a), normalize(b - a)), -1.0f, 1.0f));
+	float ba_bc_0 = acosf(clampf(dot(normalize(a - b), normalize(c - b)), -1.0f, 1.0f));
+
+	float ac_ab_1 = acosf(clampf((lab * lab + lat * lat - lcb * lcb) / (2.0f * lab * lat), -1.0f, 1.0f));
+	float ba_bc_1 = acosf(clampf((lab * lab + lcb * lcb - lat * lat) / (2.0f * lab * lcb), -1.0f, 1.0f));
+
+	quat r0 = quat_from_angle_axis(ac_ab_1 - ac_ab_0, axis_rot);
+	quat r1 = quat_from_angle_axis(ba_bc_1 - ba_bc_0, axis_rot);
+
+	vec3 c_a = normalize(bone_end - bone_root);
+	vec3 t_a = normalize(target_clamp - bone_root);
+
+	quat r2 = quat_from_angle_axis(
+		acosf(clampf(dot(c_a, t_a), -1.0f, 1.0f)),
+		normalize(cross(c_a, t_a)));
+
+	bone_root_lr = quat_inv_mul(bone_par_gr, quat_mul(r2, quat_mul(r0, bone_root_gr)));
+	bone_mid_lr = quat_inv_mul(bone_root_gr, quat_mul(r1, bone_mid_gr));
+}
+
 //--------------------------------------
 
 // Collide against the obscales which are
@@ -815,6 +1130,160 @@ void AMotionMatchingCharacter::trajectory_positions_predict( //obstacle position
 }
 
 
+//--------------------------------------
+
+vec3 AMotionMatchingCharacter::adjust_character_position(
+	const vec3 character_position,
+	const vec3 simulation_position,
+	const float halflife,
+	const float dt)
+{
+	// Find the difference in positioning
+	vec3 difference_position = simulation_position - character_position;
+
+	// Damp that difference using the given halflife and dt
+	vec3 adjustment_position = damp_adjustment_exact(
+		difference_position,
+		halflife,
+		dt);
+
+	// Add the damped difference to move the character toward the sim
+	return adjustment_position + character_position;
+}
+
+quat AMotionMatchingCharacter::adjust_character_rotation(
+	const quat character_rotation,
+	const quat simulation_rotation,
+	const float halflife,
+	const float dt)
+{
+	// Find the difference in rotation (from character to simulation).
+	// Here `quat_abs` forces the quaternion to take the shortest 
+	// path and normalization is required as sometimes taking 
+	// the difference between two very similar rotations can 
+	// introduce numerical instability
+	quat difference_rotation = quat_abs(quat_normalize(
+		quat_mul_inv(simulation_rotation, character_rotation)));
+
+	// Damp that difference using the given halflife and dt
+	quat adjustment_rotation = damp_adjustment_exact(
+		difference_rotation,
+		halflife,
+		dt);
+
+	// Apply the damped adjustment to the character
+	return quat_mul(adjustment_rotation, character_rotation);
+}
+
+vec3 AMotionMatchingCharacter::adjust_character_position_by_velocity(
+	const vec3 character_position,
+	const vec3 character_velocity,
+	const vec3 simulation_position,
+	const float max_adjustment_ratio,
+	const float halflife,
+	const float dt)
+{
+	// Find and damp the desired adjustment
+	vec3 adjustment_position = damp_adjustment_exact(
+		simulation_position - character_position,
+		halflife,
+		dt);
+
+	// If the length of the adjustment is greater than the character velocity 
+	// multiplied by the ratio then we need to clamp it to that length
+	float max_length = max_adjustment_ratio * length(character_velocity) * dt;
+
+	if (length(adjustment_position) > max_length)
+	{
+		adjustment_position = max_length * normalize(adjustment_position);
+	}
+
+	// Apply the adjustment
+	return adjustment_position + character_position;
+}
+
+quat AMotionMatchingCharacter::adjust_character_rotation_by_velocity(
+	const quat character_rotation,
+	const vec3 character_angular_velocity,
+	const quat simulation_rotation,
+	const float max_adjustment_ratio,
+	const float halflife,
+	const float dt)
+{
+	// Find and damp the desired rotational adjustment
+	quat adjustment_rotation = damp_adjustment_exact(
+		quat_abs(quat_normalize(quat_mul_inv(
+			simulation_rotation, character_rotation))),
+		halflife,
+		dt);
+
+	// If the length of the adjustment is greater than the angular velocity 
+	// multiplied by the ratio then we need to clamp this adjustment
+	float max_length = max_adjustment_ratio *
+		length(character_angular_velocity) * dt;
+
+	if (length(quat_to_scaled_angle_axis(adjustment_rotation)) > max_length)
+	{
+		// To clamp can convert to scaled angle axis, rescale, and convert back
+		adjustment_rotation = quat_from_scaled_angle_axis(max_length *
+			normalize(quat_to_scaled_angle_axis(adjustment_rotation)));
+	}
+
+	// Apply the adjustment
+	return quat_mul(adjustment_rotation, character_rotation);
+}
+
+//--------------------------------------
+vec3 AMotionMatchingCharacter::clamp_character_position(
+	const vec3 character_position,
+	const vec3 simulation_position,
+	const float max_distance)
+{
+	// If the character deviates too far from the simulation 
+	// position we need to clamp it to within the max distance
+	if (length(character_position - simulation_position) > max_distance)
+	{
+		return max_distance *
+			normalize(character_position - simulation_position) +
+			simulation_position;
+	}
+	else
+	{
+		return character_position;
+	}
+}
+
+quat AMotionMatchingCharacter::clamp_character_rotation(
+	const quat character_rotation,
+	const quat simulation_rotation,
+	const float max_angle)
+{
+	// If the angle between the character rotation and simulation 
+	// rotation exceeds the threshold we need to clamp it back
+	if (quat_angle_between(character_rotation, simulation_rotation) > max_angle)
+	{
+		// First, find the rotational difference between the two
+		quat diff = quat_abs(quat_mul_inv(
+			character_rotation, simulation_rotation));
+
+		// We can then decompose it into angle and axis
+		float diff_angle; vec3 diff_axis;
+		quat_to_angle_axis(diff, diff_angle, diff_axis);
+
+		// We then clamp the angle to within our bounds
+		diff_angle = clampf(diff_angle, -max_angle, max_angle);
+
+		// And apply back the clamped rotation
+		return quat_mul(
+			quat_from_angle_axis(diff_angle, diff_axis), simulation_rotation);
+	}
+	else
+	{
+		return character_rotation;
+	}
+}
+
+
 
 
 //---------------------------------------------------------------------
@@ -1004,6 +1473,11 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 	// Get gamepad stick states
 	vec3 gamepadstick_left = vec3(LeftStickValue2D.X, 0.0f, LeftStickValue2D.Y);
 	vec3 gamepadstick_right = vec3(RightStickValue2D.X, 0.0f, RightStickValue2D.Y);
+
+	//vec3 gamepadstick_left = vec3(LeftStickValue2D.X, 0.0f, LeftStickValue2D.Y);
+	//vec3 gamepadstick_right = vec3(RightStickValue2D.Y, 0.0f, RightStickValue2D.X); //이렇듯, X와 Y가 서로 Swap 되어야 함
+
+
 
 	// Get the desired gait (walk / run)
 	desired_gait_update(
@@ -1253,9 +1727,487 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 		Search_timer = Search_time;
 	}
 
+	// Tick down search timer
+	Search_timer -= DeltaT;
+
+	if (LMM_enabled)
+	{
+		// Update features and latents
+		stepper_evaluate(
+			Features_curr,
+			Latent_curr,
+			Stepper_evaluation,
+			Stepper,
+			DeltaT);
+
+		// Decompress next pose
+		decompressor_evaluate(
+			Curr_bone_positions,
+			Curr_bone_velocities,
+			Curr_bone_rotations,
+			Curr_bone_angular_velocities,
+			Curr_bone_contacts,
+			Decompressor_evaluation,
+			Features_curr,
+			Latent_curr,
+			Curr_bone_positions(0),
+			Curr_bone_rotations(0),
+			Decompressor,
+			DeltaT);
+	}
+	else
+	{
+		// Tick frame
+		Frame_index++; // Assumes dt is fixed to 60fps
+
+		// Look-up Next Pose
+		Curr_bone_positions = DB.bone_positions(Frame_index);
+		Curr_bone_velocities = DB.bone_velocities(Frame_index);
+		Curr_bone_rotations = DB.bone_rotations(Frame_index);
+		Curr_bone_angular_velocities = DB.bone_angular_velocities(Frame_index);
+		Curr_bone_contacts = DB.contact_states(Frame_index);
+	}
+
+	// Update inertializer
+	inertialize_pose_update(
+		Bone_positions,
+		Bone_velocities,
+		Bone_rotations,
+		Bone_angular_velocities,
+		Bone_offset_positions,
+		Bone_offset_velocities,
+		Bone_offset_rotations,
+		Bone_offset_angular_velocities,
+		Curr_bone_positions,
+		Curr_bone_velocities,
+		Curr_bone_rotations,
+		Curr_bone_angular_velocities,
+		Transition_src_position,
+		Transition_src_rotation,
+		Transition_dst_position,
+		Transition_dst_rotation,
+		Inertialize_blending_halflife,
+		DeltaT);
+	
+	// Update Simulation
+	vec3 simulation_position_prev = Simulation_position;
+
+	simulation_positions_update(
+		Simulation_position,
+		Simulation_velocity,
+		Simulation_acceleration,
+		Desired_velocity,
+		Simulation_velocity_halflife,
+		DeltaT,
+		Obstacles_positions,
+		Obstacles_scales);
+
+	simulation_rotations_update(
+		Simulation_rotation,
+		Simulation_angular_velocity,
+		Desired_rotation,
+		Simulation_rotation_halflife,
+		DeltaT);
+
+	// Synchronization 
+	if (Synchronization_enabled)
+	{
+		vec3 synchronized_position = lerp(
+			Simulation_position,
+			Bone_positions(0),
+			Synchronization_data_factor);
+
+		quat synchronized_rotation = quat_nlerp_shortest(
+			Simulation_rotation,
+			Bone_rotations(0),
+			Synchronization_data_factor);
+
+		synchronized_position = simulation_collide_obstacles(
+			simulation_position_prev,
+			synchronized_position,
+			Obstacles_positions,
+			Obstacles_scales);
+
+		Simulation_position = synchronized_position;
+		Simulation_rotation = synchronized_rotation;
+
+		inertialize_root_adjust(
+			Bone_offset_positions(0),
+			Transition_src_position,
+			Transition_src_rotation,
+			Transition_dst_position,
+			Transition_dst_rotation,
+			Bone_positions(0),
+			Bone_rotations(0),
+			synchronized_position,
+			synchronized_rotation);
+	}
 
 
+	// Adjustment 
+	if (!Synchronization_enabled && Adjustment_enabled)
+	{
+		vec3 adjusted_position = Bone_positions(0);
+		quat adjusted_rotation = Bone_rotations(0);
 
+		if (Adjustment_by_velocity_enabled)
+		{
+			adjusted_position = adjust_character_position_by_velocity(
+				Bone_positions(0),
+				Bone_velocities(0),
+				Simulation_position,
+				Adjustment_position_max_ratio,
+				Adjustment_position_halflife,
+				DELTA);
+
+			adjusted_rotation = adjust_character_rotation_by_velocity(
+				Bone_rotations(0),
+				Bone_angular_velocities(0),
+				Simulation_rotation,
+				Adjustment_rotation_max_ratio,
+				Adjustment_rotation_halflife,
+				DeltaT);
+		}
+		else
+		{
+			adjusted_position = adjust_character_position(
+				Bone_positions(0),
+				Simulation_position,
+				Adjustment_position_halflife,
+				DeltaT);
+
+			adjusted_rotation = adjust_character_rotation(
+				Bone_rotations(0),
+				Simulation_rotation,
+				Adjustment_rotation_halflife,
+				DELTA);
+		}
+
+		inertialize_root_adjust(
+			Bone_offset_positions(0),
+			Transition_src_position,
+			Transition_src_rotation,
+			Transition_dst_position,
+			Transition_dst_rotation,
+			Bone_positions(0),
+			Bone_rotations(0),
+			adjusted_position,
+			adjusted_rotation);
+	}
+
+	// Clamping
+	if (!Synchronization_enabled && Clamping_enabled)
+	{
+		vec3 adjusted_position = Bone_positions(0);
+		quat adjusted_rotation = Bone_rotations(0);
+
+		adjusted_position = clamp_character_position(
+			adjusted_position,
+			Simulation_position,
+			Clamping_max_distance);
+
+		adjusted_rotation = clamp_character_rotation(
+			adjusted_rotation,
+			Simulation_rotation,
+			Clamping_max_angle);
+
+		inertialize_root_adjust(
+			Bone_offset_positions(0),
+			Transition_src_position,
+			Transition_src_rotation,
+			Transition_dst_position,
+			Transition_dst_rotation,
+			Bone_positions(0),
+			Bone_rotations(0),
+			adjusted_position,
+			adjusted_rotation);
+	}
+
+
+	// Contact fixup with foot locking and IK
+	Adjusted_bone_positions = Bone_positions;
+	Adjusted_bone_rotations = Bone_rotations;
+
+	if (Ik_enabled)
+	{
+		for (int i = 0; i < Contact_bones.size; i++)
+		{
+			// Find all the relevant bone indices
+			int toe_bone = Contact_bones(i);
+			int heel_bone = DB.bone_parents(toe_bone);
+			int knee_bone = DB.bone_parents(heel_bone);
+			int hip_bone = DB.bone_parents(knee_bone);
+			int root_bone = DB.bone_parents(hip_bone);
+
+			// Compute the world space position for the toe
+			Global_bone_computed.zero();
+
+			forward_kinematics_partial(
+				Global_bone_positions,
+				Global_bone_rotations,
+				Global_bone_computed,
+				Bone_positions,
+				Bone_rotations,
+				DB.bone_parents,
+				toe_bone);
+
+			// Update the contact state
+			contact_update(
+				Contact_states(i),
+				Contact_locks(i),
+				Contact_positions(i),
+				Contact_velocities(i),
+				Contact_points(i),
+				Contact_targets(i),
+				Contact_offset_positions(i),
+				Contact_offset_velocities(i),
+				Global_bone_positions(toe_bone),
+				Curr_bone_contacts(i),
+				Ik_unlock_radius,
+				Ik_foot_height,
+				Ik_blending_halflife,
+				DeltaT);
+
+			// Ensure contact position never goes through floor
+			vec3 contact_position_clamp = Contact_positions(i);
+			contact_position_clamp.y = maxf(contact_position_clamp.y, Ik_foot_height);
+
+			// Re-compute toe, heel, knee, hip, and root bone positions
+			for (int bone : {heel_bone, knee_bone, hip_bone, root_bone})
+			{
+				forward_kinematics_partial(
+					Global_bone_positions,
+					Global_bone_rotations,
+					Global_bone_computed,
+					Bone_positions,
+					Bone_rotations,
+					DB.bone_parents,
+					bone);
+			}
+
+			// Perform simple two-joint IK to place heel
+			ik_two_bone(
+				Adjusted_bone_rotations(hip_bone),
+				Adjusted_bone_rotations(knee_bone),
+				Global_bone_positions(hip_bone),
+				Global_bone_positions(knee_bone),
+				Global_bone_positions(heel_bone),
+				contact_position_clamp + (Global_bone_positions(heel_bone) - Global_bone_positions(toe_bone)),
+				quat_mul_vec3(Global_bone_rotations(knee_bone), vec3(0.0f, 1.0f, 0.0f)),
+				Global_bone_rotations(hip_bone),
+				Global_bone_rotations(knee_bone),
+				Global_bone_rotations(root_bone),
+				Ik_max_length_buffer);
+
+			// Re-compute toe, heel, and knee positions 
+			Global_bone_computed.zero();
+
+			for (int bone : {toe_bone, heel_bone, knee_bone})
+			{
+				forward_kinematics_partial(
+					Global_bone_positions,
+					Global_bone_rotations,
+					Global_bone_computed,
+					Adjusted_bone_positions,
+					Adjusted_bone_rotations,
+					DB.bone_parents,
+					bone);
+			}
+
+			// Rotate heel so toe is facing toward contact point
+			ik_look_at(
+				Adjusted_bone_rotations(heel_bone),
+				Global_bone_rotations(knee_bone),
+				Global_bone_rotations(heel_bone),
+				Global_bone_positions(heel_bone),
+				Global_bone_positions(toe_bone),
+				contact_position_clamp);
+
+			// Re-compute toe and heel positions
+			Global_bone_computed.zero();
+
+			for (int bone : {toe_bone, heel_bone})
+			{
+				forward_kinematics_partial(
+					Global_bone_positions,
+					Global_bone_rotations,
+					Global_bone_computed,
+					Adjusted_bone_positions,
+					Adjusted_bone_rotations,
+					DB.bone_parents,
+					bone);
+			}
+
+			// Rotate toe bone so that the end of the toe 
+			// does not intersect with the ground
+			vec3 toe_end_curr = quat_mul_vec3(
+				Global_bone_rotations(toe_bone), vec3(Ik_toe_length, 0.0f, 0.0f)) +
+				Global_bone_positions(toe_bone);
+
+			vec3 toe_end_targ = toe_end_curr;
+			toe_end_targ.y = maxf(toe_end_targ.y, Ik_foot_height);
+
+			ik_look_at(
+				Adjusted_bone_rotations(toe_bone),
+				Global_bone_rotations(heel_bone),
+				Global_bone_rotations(toe_bone),
+				Global_bone_positions(toe_bone),
+				toe_end_curr,
+				toe_end_targ);
+		}
+	}
+
+	// Full pass of forward kinematics to compute 
+	// all bone positions and rotations in the world
+	// space ready for rendering
+	forward_kinematics_full(
+		Global_bone_positions,
+		Global_bone_rotations,
+		Adjusted_bone_positions,
+		Adjusted_bone_rotations,
+		DB.bone_parents);
+
+	//----------------------------------------------------------------------------------
+	//여기서부터는 unreal engine 형식에 맞게 변환하는 작업이 필요함
+
+	// Update camera
+	orbit_camera_update(
+		Camera_azimuth,
+		Camera_altitude,
+		Camera_distance,
+		//Bone_positions(0) + vec3(0, 1, 0), //이것이 카메라의 target의 위치가 될 예정임
+		// simulation_position + vec3(0, 1, 0),
+		gamepadstick_right,
+		Desired_strafe,
+		DeltaT);
+	
+
+	//// Render
+	// 
+	//BeginDrawing();
+	//ClearBackground(RAYWHITE);
+
+	//BeginMode3D(camera);
+
+	//// Draw Simulation Object
+
+	//DrawCylinderWires(to_Vector3(simulation_position), 0.6f, 0.6f, 0.001f, 17, ORANGE);
+	//DrawSphereWires(to_Vector3(simulation_position), 0.05f, 4, 10, ORANGE);
+	//DrawLine3D(to_Vector3(simulation_position), to_Vector3(
+	//	simulation_position + 0.6f * quat_mul_vec3(simulation_rotation, vec3(0.0f, 0.0f, 1.0f))), ORANGE);
+
+	//// Draw Clamping Radius/Angles
+
+	//if (clamping_enabled)
+	//{
+	//	DrawCylinderWires(
+	//		to_Vector3(simulation_position),
+	//		clamping_max_distance,
+	//		clamping_max_distance,
+	//		0.001f, 17, SKYBLUE);
+
+	//	quat rotation_clamp_0 = quat_mul(quat_from_angle_axis(+clamping_max_angle, vec3(0.0f, 1.0f, 0.0f)), simulation_rotation);
+	//	quat rotation_clamp_1 = quat_mul(quat_from_angle_axis(-clamping_max_angle, vec3(0.0f, 1.0f, 0.0f)), simulation_rotation);
+
+	//	vec3 rotation_clamp_0_dir = simulation_position + 0.6f * quat_mul_vec3(rotation_clamp_0, vec3(0.0f, 0.0f, 1.0f));
+	//	vec3 rotation_clamp_1_dir = simulation_position + 0.6f * quat_mul_vec3(rotation_clamp_1, vec3(0.0f, 0.0f, 1.0f));
+
+	//	DrawLine3D(to_Vector3(simulation_position), to_Vector3(rotation_clamp_0_dir), SKYBLUE);
+	//	DrawLine3D(to_Vector3(simulation_position), to_Vector3(rotation_clamp_1_dir), SKYBLUE);
+	//}
+
+	//// Draw IK foot lock positions
+
+	//if (ik_enabled)
+	//{
+	//	for (int i = 0; i < contact_positions.size; i++)
+	//	{
+	//		if (contact_locks(i))
+	//		{
+	//			DrawSphereWires(to_Vector3(contact_positions(i)), 0.05f, 4, 10, PINK);
+	//		}
+	//	}
+	//}
+
+	//draw_trajectory(
+	//	trajectory_positions,
+	//	trajectory_rotations,
+	//	ORANGE);
+
+	//draw_obstacles(
+	//	obstacles_positions,
+	//	obstacles_scales);
+
+	//deform_character_mesh(
+	//	character_mesh,
+	//	character_data,
+	//	global_bone_positions,
+	//	global_bone_rotations,
+	//	db.bone_parents);
+
+	//DrawModel(character_model, (Vector3) { 0.0f, 0.0f, 0.0f }, 1.0f, RAYWHITE);
+
+	//// Draw matched features
+
+	//array1d<float> current_features = lmm_enabled ? slice1d<float>(features_curr) : db.features(frame_index);
+	//denormalize_features(current_features, db.features_offset, db.features_scale);
+	//draw_features(current_features, bone_positions(0), bone_rotations(0), MAROON);
+
+	//// Draw Simuation Bone
+
+	//DrawSphereWires(to_Vector3(bone_positions(0)), 0.05f, 4, 10, MAROON);
+	//DrawLine3D(to_Vector3(bone_positions(0)), to_Vector3(
+	//	bone_positions(0) + 0.6f * quat_mul_vec3(bone_rotations(0), vec3(0.0f, 0.0f, 1.0f))), MAROON);
+
+	//// Draw Ground Plane
+
+	//DrawModel(ground_plane_model, (Vector3) { 0.0f, -0.01f, 0.0f }, 1.0f, WHITE);
+	//DrawGrid(20, 1.0f);
+	//draw_axis(vec3(), quat());
+
+	//EndMode3D();
+
+	//--------------------------------------------------------------------------------
+
+
+	bool ik_enabled_prev = Ik_enabled;
+
+	// Foot locking needs resetting when IK is toggled
+	if (Ik_enabled && !ik_enabled_prev)
+	{
+		for (int i = 0; i < Contact_bones.size; i++)
+		{
+			vec3 bone_position;
+			vec3 bone_velocity;
+			quat bone_rotation;
+			vec3 bone_angular_velocity;
+
+			forward_kinematics_velocity(
+				bone_position,
+				bone_velocity,
+				bone_rotation,
+				bone_angular_velocity,
+				Bone_positions,
+				Bone_velocities,
+				Bone_rotations,
+				Bone_angular_velocities,
+				DB.bone_parents,
+				Contact_bones(i));
+
+			contact_reset(
+				Contact_states(i),
+				Contact_locks(i),
+				Contact_positions(i),
+				Contact_velocities(i),
+				Contact_points(i),
+				Contact_targets(i),
+				Contact_offset_positions(i),
+				Contact_offset_velocities(i),
+				bone_position,
+				bone_velocity,
+				false);
+		}
+	}
 
 }
 
@@ -1557,46 +2509,37 @@ void AMotionMatchingCharacter::InputLog()
 	}
 
 
-	//FRotator Rottest = PlayerController->GetControlRotation();
-	//UE_LOG(LogTemp, Log, TEXT("GetControlRotation()"));
-	//UE_LOG(LogTemp, Log, TEXT("Roll: %f, Pitch: %f, Yaw: %f"), Rottest.Roll, Rottest.Pitch, Rottest.Yaw);
+
+	//캐릭터의 월드 위치
+	FVector CharacterWorldPos = GetActorLocation();
+	UE_LOG(LogTemp, Log, TEXT("Character World Location: "));
+	UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), CharacterWorldPos.X, CharacterWorldPos.Y, CharacterWorldPos.Z);
+
+	//카메라의 월드 위치
+	FVector CamWorldPos = FollowCamera->GetComponentLocation();
+	UE_LOG(LogTemp, Log, TEXT("Cam World Location: "));
+	UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), CamWorldPos.X, CamWorldPos.Y, CamWorldPos.Z);
 
 
-	//FVector Vectest = PlayerController->GetInputVectorAxisValue(EKeys::Gamepad_LeftThumbstick);
-	//UE_LOG(LogTemp, Log, TEXT("EKeys::Gamepad_LeftThumbstick"));
-	//UE_LOG(LogTemp, Log, TEXT("X: %f, Y: %f, Z: %f"), Vectest.X, Vectest.Y, Vectest.Z);
+	//-------------------------------------------
+	//Zoom input 테스트
+	if (CamZoomIn == true)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Cam Zoom In"));
+	}
+	else
+	{
+		;
+	}
 
+	if (CamZoomOut == true)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Cam Zoom Out"));
+	}
+	else
+	{
+		;
+	}
 
-
-
-	////우측 조이스틱(회전) 키를 입력하는지 체크
-	//if (PlayerController)
-	//{
-	//	if (!PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Down) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Up)
-	//		&& !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Left) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Right))
-	//	{
-	//		IsHandlingRightStick = false;
-	//	}
-	//	else
-	//	{
-	//		IsHandlingRightStick = true;
-	//	}
-	//}
-
-	//if (PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Down) || PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Up)
-	//	|| PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Left) || PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Right))
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Stick activated"));
-	//}
-	//else
-	//{
-	//	;
-	//}
-
-
-
-
-
-	//Cast<APlayerController>(Controller)->IsInputKeyDown(EKeys::A);
 
 }

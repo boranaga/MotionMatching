@@ -60,6 +60,15 @@ class AMotionMatchingCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* StrafeAction;
 
+	/** Zoom Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ZoomInAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ZoomOutAction;
+
+
+
 public:
 	AMotionMatchingCharacter();
 	
@@ -71,6 +80,23 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	//------------------------------------------------
+	/** Called for strafe input */
+	void OnStrafe(const FInputActionValue& Value);
+
+	void OffStrafe(const FInputActionValue& Value);
+
+	/** Called for camera zoom input */
+	void CamZoomInOn(const FInputActionValue& Value);
+
+	void CamZoomInOff(const FInputActionValue& Value);
+
+	void CamZoomOutOn(const FInputActionValue& Value);
+
+	void CamZoomOutOff(const FInputActionValue& Value);
+
+
 			
 
 protected:
@@ -132,16 +158,18 @@ protected: //Motion Matching 관련 variables
 
 
 	// Camera
-	//Camera3D camera = { 0 }; //->raylib에서 사용하는 객체같은데 이 코드가 무엇을 의미하는 것일까
+	//Camera3D camera = { 0 }; //->raylib에서 사용하는 객체같은데 이 코드(" { 0 } ")가 무엇을 의미하는 것일까
+	// -> 언리얼의 카메라 객체에 접근하자
 	//camera.position = (Vector3){ 0.0f, 10.0f, 10.0f };
 	//camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
 	//camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
 	//camera.fovy = 45.0f;
 	//camera.projection = CAMERA_PERSPECTIVE;
 
+
 	float Camera_azimuth = 0.0f;
-	float Camera_altitude = 0.4f;
-	float Camera_distance = 4.0f;
+	float Camera_altitude = 0.4f * 100;
+	float Camera_distance = 4.0f * 100;
 
 
 	// Scene Obstacles
@@ -305,6 +333,9 @@ protected: //Motion Matching 관련 variables
 	UPROPERTY()
 	bool Desired_strafe = false;
 
+	bool CamZoomIn = false;
+	bool CamZoomOut = false;
+
 	FVector2D RightStickValue2D;
 	FVector2D LeftStickValue2D;
 
@@ -359,10 +390,28 @@ public: //Motion Matching 관련
 		const bool desired_strafe,
 		const float dt);
 
-	/** Called for looking input */
-	void OnStrafe(const FInputActionValue& Value);
+	float orbit_camera_update_altitude(
+		const float altitude,
+		const vec3 gamepadstick_right,
+		const bool desired_strafe,
+		const float dt);
 
-	void OffStrafe(const FInputActionValue& Value);
+	float orbit_camera_update_distance(
+		const float distance,
+		const float dt);
+
+
+	void orbit_camera_update(
+		//Camera3D& cam,
+		float& camera_azimuth,
+		float& camera_altitude,
+		float& camera_distance,
+		//const vec3 target,
+		const vec3 gamepadstick_right,
+		const bool desired_strafe,
+		const float dt
+	); //언리얼 엔진에 맞게 새롭게 정의했음
+
 
 	void desired_gait_update(
 		float& desired_gait,
@@ -482,6 +531,46 @@ public: //Motion Matching 관련
 		const vec3 input_contact_velocity,
 		const bool input_contact_state);
 
+	void contact_update(
+		bool& contact_state,
+		bool& contact_lock,
+		vec3& contact_position,
+		vec3& contact_velocity,
+		vec3& contact_point,
+		vec3& contact_target,
+		vec3& contact_offset_position,
+		vec3& contact_offset_velocity,
+		const vec3 input_contact_position,
+		const bool input_contact_state,
+		const float unlock_radius,
+		const float foot_height,
+		const float halflife,
+		const float dt,
+		const float eps);
+
+	void ik_look_at(
+		quat& bone_rotation,
+		const quat global_parent_rotation,
+		const quat global_rotation,
+		const vec3 global_position,
+		const vec3 child_position,
+		const vec3 target_position,
+		const float eps);
+
+	void ik_two_bone(
+		quat& bone_root_lr,
+		quat& bone_mid_lr,
+		const vec3 bone_root,
+		const vec3 bone_mid,
+		const vec3 bone_end,
+		const vec3 target,
+		const vec3 fwd,
+		const quat bone_root_gr,
+		const quat bone_mid_gr,
+		const quat bone_par_gr,
+		const float max_length_buffer);
+
+
 	vec3 simulation_collide_obstacles(
 		const vec3 prev_pos,
 		const vec3 next_pos,
@@ -552,7 +641,43 @@ public: //Motion Matching 관련
 		const float back_speed,
 		const float dt);
 
+	vec3 adjust_character_position(
+		const vec3 character_position,
+		const vec3 simulation_position,
+		const float halflife,
+		const float dt);
 
+	quat adjust_character_rotation(
+		const quat character_rotation,
+		const quat simulation_rotation,
+		const float halflife,
+		const float dt);
+
+	vec3 adjust_character_position_by_velocity(
+		const vec3 character_position,
+		const vec3 character_velocity,
+		const vec3 simulation_position,
+		const float max_adjustment_ratio,
+		const float halflife,
+		const float dt);
+
+	quat adjust_character_rotation_by_velocity(
+		const quat character_rotation,
+		const vec3 character_angular_velocity,
+		const quat simulation_rotation,
+		const float max_adjustment_ratio,
+		const float halflife,
+		const float dt);
+
+	vec3 clamp_character_position(
+		const vec3 character_position,
+		const vec3 simulation_position,
+		const float max_distance);
+
+	quat clamp_character_rotation(
+		const quat character_rotation,
+		const quat simulation_rotation,
+		const float max_angle);
 
 
 public:
