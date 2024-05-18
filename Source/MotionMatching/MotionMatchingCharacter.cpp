@@ -60,7 +60,7 @@ AMotionMatchingCharacter::AMotionMatchingCharacter()
 
 	//PoseableMesh를 생성하고 RootComponent에 종속 시킴.
 	PoseableMesh = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("PoseableMesh"));
-	PoseableMesh->SetupAttachment(RootComponent);
+	//PoseableMesh->SetupAttachment(RootComponent);
 
 
 
@@ -124,6 +124,8 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 	//-------------------------------------------------------------
 	//Input이 잘 작동하는지 테스트
 	InputLog();
+
+	DeltaT = DeltaTime; //DeltaT를 DeltaTime으로 초기화
 
 	MotionMatchingMainTick();
 
@@ -321,12 +323,14 @@ void AMotionMatchingCharacter::SetSimulationObj() {
 	float rotscale = 1;
 
 	//Set Position
-	//FVector NewCharacterWorldPos(Simulation_position.y * scale, Simulation_position.x * scale, Simulation_position.z * scale);
-	FVector NewCharacterWorldPos(Simulation_position.z * scale, Simulation_position.x * scale, Simulation_position.y * scale); //언리얼 좌표계로 변환
+	FVector NewCharacterWorldPos(Simulation_position.z * scale, Simulation_position.x * (-1) * scale, Simulation_position.y * scale); //언리얼 좌표계로 변환
+	//FVector NewCharacterWorldPos(Simulation_position.z * scale, Simulation_position.x * (1) * scale, Simulation_position.y * scale); //언리얼 좌표계로 변환
 	SetActorLocation(NewCharacterWorldPos);
 
 	//Set Rotation
-	FQuat RotationQuat(Simulation_rotation.z * (1), Simulation_rotation.x * (-1), Simulation_rotation.y * (1), Simulation_rotation.w * rotscale); //언리얼 좌표계로 변환
+	//FQuat RotationQuat(Simulation_rotation.z * (1), Simulation_rotation.x * (-1), Simulation_rotation.y * (1), Simulation_rotation.w * rotscale); //언리얼 좌표계로 변환
+	FQuat RotationQuat(Simulation_rotation.z * (1), Simulation_rotation.x * (1), Simulation_rotation.y * (-1), Simulation_rotation.w * rotscale); //언리얼 좌표계로 변환
+
 	FRotator NewCharacterRotation = RotationQuat.Rotator();
 	SetActorRotation(NewCharacterRotation);
 
@@ -340,19 +344,23 @@ void AMotionMatchingCharacter::SetCharacterAnimation() {
 	//관절의 개수
 	int JointsNum = JointsNames.Num();
 
+
+	//-------------------------------------------------------------------------------
+	//<Set Rotation>
+
+
 	array1d<quat> bone_rotations = Global_bone_rotations;
 	TArray<FQuat> JointsQuat;
 
 
 	//JointsQuat.Emplace(FQuat(bone_rotations.data[0].z * (1), bone_rotations.data[0].x * (-1), bone_rotations.data[0].y * (1), bone_rotations.data[0].w));
-	JointsQuat.Emplace(FQuat(bone_rotations.data[0].y * (1), bone_rotations.data[0].x * (1), bone_rotations.data[0].z * (-1), bone_rotations.data[0].w));
+	JointsQuat.Emplace(FQuat(bone_rotations.data[0].y * (1), bone_rotations.data[0].x * (1), bone_rotations.data[0].z * (-1), bone_rotations.data[0].w * (1) ));
 
 	for (int i = 1; i < JointsNum; i++) {
 		//언리얼에 맞게 좌표계를 변환해줌
 		JointsQuat.Emplace(FQuat(bone_rotations.data[i].y * (1), bone_rotations.data[i].x * (1), bone_rotations.data[i].z * (-1), bone_rotations.data[i].w));
 		//JointsQuat.Emplace(FQuat(bone_rotations.data[i].z * (1), bone_rotations.data[i].x * (-1), bone_rotations.data[i].y * (1), bone_rotations.data[i].w));
 	}
-
 
 	//Set pose
 	FQuat StandQuat(0, 1, 0, 90);
@@ -370,6 +378,30 @@ void AMotionMatchingCharacter::SetCharacterAnimation() {
 
 	//GetMesh()->SetBoneRotationByName(FName(JointsNames[0]), GetMesh()->GetBoneRotationByName(FName(JointsNames[0]), EBoneSpaces::WorldSpace) + StandQuat.Rotator(), EBoneSpaces::WorldSpace);
 	GetMesh()->SetBoneRotationByName(FName(JointsNames[0]), GetMesh()->GetBoneRotationByName(FName(JointsNames[0]), EBoneSpaces::ComponentSpace) + StandQuat.Rotator(), EBoneSpaces::ComponentSpace);
+
+
+	//-------------------------------------------------------------------------------
+	//<Set Position>
+	array1d<vec3> bone_positions = Global_bone_positions;
+	TArray<FVector> JointsVec;
+
+	int scale = 100;
+
+	for (int i = 0; i < JointsNum; i++) {
+		JointsVec.Emplace(FVector(bone_positions.data[i].z * scale, bone_positions.data[i].x * (-1) * scale, bone_positions.data[i].y * scale));
+		//JointsVec.Emplace(FVector(bone_positions.data[i].z * scale, bone_positions.data[i].x * (1) * scale, bone_positions.data[i].y * scale));
+	}
+
+	//Set Pose
+	GetMesh()->SetBoneLocationByName(FName(JointsNames[0]), JointsVec[0], EBoneSpaces::WorldSpace);
+
+	//for (int i = 1; i < JointsNum; i++) {
+	//	//FVector Position = JointsVector[i] + BasicCharatorVector[i]; //basic에 position 더한 값
+	//	FVector Position = JointsVector[i];
+	//	GetMesh()->SetBoneLocationByName(FName(JointsNames[i]), Position, EBoneSpaces::ComponentSpace);
+	//}
+
+
 }
 
 
@@ -1585,12 +1617,14 @@ void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 
 void AMotionMatchingCharacter::MotionMatchingMainTick() {
 
+
 	// Get gamepad stick states
-	vec3 gamepadstick_left = vec3(LeftStickValue2D.X, 0.0f, LeftStickValue2D.Y);
+	//vec3 gamepadstick_left = vec3(LeftStickValue2D.X, 0.0f, LeftStickValue2D.Y);
+
+	vec3 gamepadstick_left = vec3(LeftStickValue2D.X, 0.0f, LeftStickValue2D.Y *(-1)); //Y에 (-1)을 곱해주었음
+
 	vec3 gamepadstick_right = vec3(RightStickValue2D.X, 0.0f, RightStickValue2D.Y);
 
-	//vec3 gamepadstick_left = vec3(LeftStickValue2D.X, 0.0f, LeftStickValue2D.Y);
-	//vec3 gamepadstick_right = vec3(RightStickValue2D.Y, 0.0f, RightStickValue2D.X); //이렇듯, X와 Y가 서로 Swap 되어야 함
 
 
 

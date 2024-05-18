@@ -266,6 +266,20 @@ protected: //Motion Matching ฐüทร variables
 	float Simulation_walk_fwrd_speed = 1.75f;
 	float Simulation_walk_side_speed = 1.5f;
 	float Simulation_walk_back_speed = 1.25f;
+	// 
+	//float Simulation_run_fwrd_speed = 4.0f * 2;
+	//float Simulation_run_side_speed = 3.0f * 2;
+	//float Simulation_run_back_speed = 2.5f * 2;
+
+	////float Simulation_walk_fwrd_speed = 1.75f * 2;
+	////float Simulation_walk_side_speed = 1.5f * 2;
+	////float Simulation_walk_back_speed = 1.25f * 2;
+
+	//float Simulation_walk_fwrd_speed = 1.75f * 5;
+	//float Simulation_walk_side_speed = 1.5f * 5;
+	//float Simulation_walk_back_speed = 1.25f * 5;
+
+
 
 	array1d<vec3> Trajectory_desired_velocities = array1d<vec3>(4);
 	array1d<quat> Trajectory_desired_rotations = array1d<quat>(4);
