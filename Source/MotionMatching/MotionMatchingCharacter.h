@@ -251,6 +251,7 @@ protected: //Motion Matching 관련 variables
 	float Synchronization_data_factor = 1.0f;
 
 	// Adjustment
+	UPROPERTY(BlueprintReadWrite)
 	bool Adjustment_enabled;
 	bool Adjustment_by_velocity_enabled;
 	float Adjustment_position_halflife = 0.1f;
@@ -259,11 +260,13 @@ protected: //Motion Matching 관련 variables
 	float Adjustment_rotation_max_ratio = 0.5f;
 
 	// Clamping
+	UPROPERTY(BlueprintReadWrite)
 	bool Clamping_enabled;
 	float Clamping_max_distance = 0.15f;
 	float Clamping_max_angle = 0.5f * PIf;
 
 	// IK
+	UPROPERTY(BlueprintReadWrite)
 	bool Ik_enabled;
 	float Ik_max_length_buffer = 0.015f;
 	float Ik_foot_height = 0.02f;
@@ -288,6 +291,7 @@ protected: //Motion Matching 관련 variables
 
 
 	// Learned Motion Matching
+	UPROPERTY(BlueprintReadWrite)
 	bool LMM_enabled;
 
 	nnet Decompressor, Stepper, Projector;

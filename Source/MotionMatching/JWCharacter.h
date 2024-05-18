@@ -25,16 +25,23 @@ protected:
 
 
 protected:
-	/** Strafe Input Action */
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* MenuAction;
+	void DisPlayMenu();
+
+	bool IsTabButtonDown = false;
+
+	/** StrafeInput Action */
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* StrafeAction;
+	/*UInputAction* StrafeAction;*/
 
 
-	/** Called for looking input */
-	void OnStrafe(const FInputActionValue& Value);
+	///** Called for looking input */
+	//void OnStrafe(const FInputActionValue& Value);
 
-	void OffStrafe(const FInputActionValue& Value);
+	//void OffStrafe(const FInputActionValue& Value);
 
-	bool Desired_strafe = false;
+	//bool Desired_strafe = false;
 
 };

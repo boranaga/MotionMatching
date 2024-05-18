@@ -10,25 +10,22 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Kismet/GameplayStatics.h"
+#include "MMPlayerController.h"
+
 
 void AJWCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-
-		// Strafe
-		// 주의 : 메인 캐릭터로 복붙할때 &AJWCharacter:: 이거 수정!
-		EnhancedInputComponent->BindAction(StrafeAction, ETriggerEvent::Started, this, &AJWCharacter::OnStrafe);
-		EnhancedInputComponent->BindAction(StrafeAction, ETriggerEvent::Completed, this, &AJWCharacter::OffStrafe);
-
+		EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Triggered, this, &AJWCharacter::DisPlayMenu);
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
-
 void AJWCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -38,23 +35,87 @@ void AJWCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Strafe 동작 테스트 확인하고 지워도 됨
-	if(Desired_strafe == true) 
+	if (LMM_enabled)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Strafe ON!!"));
+		UE_LOG(LogTemp, Log, TEXT("LMM ON"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("Strafe OFF!!"));
+		UE_LOG(LogTemp, Log, TEXT("LMM OFF"));
+	}
+
+	if (Ik_enabled)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Ik_enabled ON"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Ik_enabled OFF"));
+	}
+
+	if (Adjustment_enabled)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Adjustment_enabled ON"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Adjustment_enabled OFF"));
+	}
+
+	if (Clamping_enabled)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Clamping_enabled ON"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Clamping_enabled OFF"));
 	}
 }
 
-void AJWCharacter::OnStrafe(const FInputActionValue& Value)
+void AJWCharacter::DisPlayMenu()
 {
-	Desired_strafe = true;
+	AMMPlayerController* PlayerController = Cast<AMMPlayerController>(Controller);
+	IsTabButtonDown = !IsTabButtonDown;
+
+	if(PlayerController)
+	{
+		PlayerController->ViewMenu(IsTabButtonDown);
+
+	}
 }
 
-void AJWCharacter::OffStrafe(const FInputActionValue& Value)
-{
-	Desired_strafe = false;
-}
+
+
+
+
+
+
+
+
+
+//void AJWCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+//{
+//	Super::SetupPlayerInputComponent(PlayerInputComponent);
+//
+//	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
+//
+//		// Strafe
+//		// 주의 : 메인 캐릭터로 복붙할때 &AJWCharacter:: 이거 수정!
+//		EnhancedInputComponent->BindAction(StrafeAction, ETriggerEvent::Started, this, &AJWCharacter::OnStrafe);
+//		EnhancedInputComponent->BindAction(StrafeAction, ETriggerEvent::Completed, this, &AJWCharacter::OffStrafe);
+//
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+//	}
+//}
+//void AJWCharacter::OnStrafe(const FInputActionValue& Value)
+//{
+//	Desired_strafe = true;
+//}
+//
+//void AJWCharacter::OffStrafe(const FInputActionValue& Value)
+//{
+//	Desired_strafe = false;
+//}
