@@ -85,7 +85,6 @@ void AMotionMatchingCharacter::BeginPlay()
 	}
 
 
-
 	//---------------------------------------------------
 
 	TickTime = 0.0f; //Tick timer를 0으로 초기화
@@ -172,22 +171,24 @@ void AMotionMatchingCharacter::Move(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	//이것은 사용안함 //사용자 정의 함수 사용할 것임
+	//if (Controller != nullptr)
+	//{
+	//	// find out which way is forward
+	//	const FRotator Rotation = Controller->GetControlRotation();
+	//	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
-	}
+	//	// get forward vector
+	//	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	//
+	//	// get right vector 
+	//	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	//	// add movement 
+	//	AddMovementInput(ForwardDirection, MovementVector.Y);
+	//	AddMovementInput(RightDirection, MovementVector.X);
+	//}
 
 
 	// Gamepad left stick vector 2d value
@@ -200,7 +201,7 @@ void AMotionMatchingCharacter::Look(const FInputActionValue& Value)
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 
-	//잠시 꺼뒀음
+	//이것은 사용안함 //사용자 정의 함수를 사용할 것임
 	//if (Controller != nullptr)
 	//{
 	//	// add yaw and pitch input to controller
@@ -208,17 +209,13 @@ void AMotionMatchingCharacter::Look(const FInputActionValue& Value)
 	//	AddControllerPitchInput(LookAxisVector.Y);
 	//}
 
-
 	// Gamepad Right stick vector 2d value
 	RightStickValue2D = Value.Get<FVector2D>();
 }
 
 
-
-
 //---------------------------------------------------------------------
 //<사용자 정의 함수 정의 부분>
-
 
 
 //UCharacter 클래스에 존재하는 GetMesh() 함수 재정의 -> PosealbeMeshComponent를 가져옴.
@@ -264,16 +261,82 @@ void AMotionMatchingCharacter::CamZoomOutOff(const FInputActionValue& Value)
 }
 
 
+void AMotionMatchingCharacter::SetSimulationObj() {
+
+	//Simulation_position;
+	//Simulation_rotation;
+
+	float scale = 100;
+	float rotscale = 1;
+
+	//Set Position
+	//FVector NewCharacterWorldPos(Simulation_position.y * scale, Simulation_position.x * scale, Simulation_position.z * scale);
+	FVector NewCharacterWorldPos(Simulation_position.z * scale, Simulation_position.x * scale, Simulation_position.y * scale); //언리얼 좌표계로 변환
+	SetActorLocation(NewCharacterWorldPos);
+
+	//Set Rotation
+	FQuat RotationQuat(Simulation_rotation.z * (1), Simulation_rotation.x * (-1), Simulation_rotation.y * (1), Simulation_rotation.w * rotscale); //언리얼 좌표계로 변환
+	FRotator NewCharacterRotation = RotationQuat.Rotator();
+	SetActorRotation(NewCharacterRotation);
+
+}
+
+
+
+void AMotionMatchingCharacter::SetCharacterAnimation() {
+
+
+	//관절의 개수
+	int JointsNum = JointsNames.Num();
+
+	array1d<quat> bone_rotations = Global_bone_rotations;
+	TArray<FQuat> JointsQuat;
+
+
+	//JointsQuat.Emplace(FQuat(bone_rotations.data[0].z * (1), bone_rotations.data[0].x * (-1), bone_rotations.data[0].y * (1), bone_rotations.data[0].w));
+	JointsQuat.Emplace(FQuat(bone_rotations.data[0].y * (1), bone_rotations.data[0].x * (1), bone_rotations.data[0].z * (-1), bone_rotations.data[0].w));
+
+	for (int i = 1; i < JointsNum; i++) {
+		//언리얼에 맞게 좌표계를 변환해줌
+		JointsQuat.Emplace(FQuat(bone_rotations.data[i].y * (1), bone_rotations.data[i].x * (1), bone_rotations.data[i].z * (-1), bone_rotations.data[i].w));
+		//JointsQuat.Emplace(FQuat(bone_rotations.data[i].z * (1), bone_rotations.data[i].x * (-1), bone_rotations.data[i].y * (1), bone_rotations.data[i].w));
+	}
+
+
+	//Set pose
+	FQuat StandQuat(0, 1, 0, 90);
+	//GetMesh()->SetBoneRotationByName(FName(JointsNames[0]), JointsQuat[0].Rotator(), EBoneSpaces::WorldSpace);
+	GetMesh()->SetBoneRotationByName(FName(JointsNames[0]), JointsQuat[0].Rotator(), EBoneSpaces::ComponentSpace);
+
+	for (int i = 1; i < JointsNum; i++) {
+		FRotator Rotation = JointsQuat[i].Rotator();
+		GetMesh()->SetBoneRotationByName(FName(JointsNames[i]), Rotation, EBoneSpaces::ComponentSpace);
+		//GetMesh()->SetBoneRotationByName(FName(JointsNames[i]), Rotation, EBoneSpaces::WorldSpace);
+	}
+
+	//Mesh를 world y축을 기준으로 90도 회전시켜서 세움
+	//GetMesh()->SetBoneRotationByName(FName(JointsNames[1]), GetMesh()->GetBoneRotationByName(FName(JointsNames[1]), EBoneSpaces::ComponentSpace) + StandQuat.Rotator(), EBoneSpaces::ComponentSpace);
+
+	//GetMesh()->SetBoneRotationByName(FName(JointsNames[0]), GetMesh()->GetBoneRotationByName(FName(JointsNames[0]), EBoneSpaces::WorldSpace) + StandQuat.Rotator(), EBoneSpaces::WorldSpace);
+	GetMesh()->SetBoneRotationByName(FName(JointsNames[0]), GetMesh()->GetBoneRotationByName(FName(JointsNames[0]), EBoneSpaces::ComponentSpace) + StandQuat.Rotator(), EBoneSpaces::ComponentSpace);
+}
+
+
+
+
+
+
+
 float AMotionMatchingCharacter::orbit_camera_update_azimuth(
 	const float azimuth,
 	const vec3 gamepadstick_right,
 	const bool desired_strafe,
 	const float dt)
 {
-	float speed = 5;
+	float speed = 5; //회전 속도
 
 	vec3 gamepadaxis = desired_strafe ? vec3() : gamepadstick_right;
-	return azimuth + 2.0f * dt * -gamepadaxis.x * speed * (-1);
+	return azimuth + 2.0f * dt * -gamepadaxis.x * speed * (-1); //(-1) 곱해줘야함
 }
 
 float AMotionMatchingCharacter::orbit_camera_update_altitude(
@@ -282,10 +345,10 @@ float AMotionMatchingCharacter::orbit_camera_update_altitude(
 	const bool desired_strafe,
 	const float dt)
 {
-	float speed = 5;
+	float speed = 5; //회전 속도
 
 	vec3 gamepadaxis = desired_strafe ? vec3() : gamepadstick_right;
-	return clampf(altitude + 2.0f * dt * gamepadaxis.z * speed * (-1), 0.0, 0.4f * PIf);
+	return clampf(altitude + 2.0f * dt * gamepadaxis.z * speed * (-1), 0.0, 0.4f * PIf); //(-1) 곱해줘야함
 }
 
 
@@ -322,7 +385,7 @@ void AMotionMatchingCharacter::orbit_camera_update(
 	quat rotation_azimuth = quat_from_angle_axis(camera_azimuth, vec3(0, 0, 1)); //언리얼에서는 (0, 0, 1)을 기준으로 함
 
 	//vec3 position = quat_mul_vec3(rotation_azimuth, vec3(0, 0, camera_distance));
-	vec3 position = quat_mul_vec3(rotation_azimuth, vec3(0, camera_distance, 0));
+	vec3 position = quat_mul_vec3(rotation_azimuth, vec3(0, camera_distance, 0)); //언리얼에 맞게 수정해줌
 	//vec3 axis = normalize(cross(position, vec3(0, 1, 0)));
 	vec3 axis = normalize(cross(position, vec3(0, 0, 1)));
 
@@ -1443,7 +1506,8 @@ void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 
 
 	// Learned Motion Matching
-	LMM_enabled = false;
+	//LMM_enabled = false;
+	LMM_enabled = true;
 
 
 	FString DecompressorPath = FPaths::ProjectContentDir() + TEXT("/decompressor.bin");
@@ -2083,21 +2147,13 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 	
 
 	//// Render
+	// Draw Simulation Object
 	// 
-	//BeginDrawing();
-	//ClearBackground(RAYWHITE);
+	SetSimulationObj();
 
-	//BeginMode3D(camera);
-
-	//// Draw Simulation Object
-
-	//DrawCylinderWires(to_Vector3(simulation_position), 0.6f, 0.6f, 0.001f, 17, ORANGE);
-	//DrawSphereWires(to_Vector3(simulation_position), 0.05f, 4, 10, ORANGE);
-	//DrawLine3D(to_Vector3(simulation_position), to_Vector3(
-	//	simulation_position + 0.6f * quat_mul_vec3(simulation_rotation, vec3(0.0f, 0.0f, 1.0f))), ORANGE);
+	SetCharacterAnimation();
 
 	//// Draw Clamping Radius/Angles
-
 	//if (clamping_enabled)
 	//{
 	//	DrawCylinderWires(
