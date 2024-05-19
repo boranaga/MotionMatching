@@ -4,6 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "MotionMatchingCharacter.h"
+
+#include "MMcommon.h"
+#include "MMvec.h"
+#include "MMquat.h"
+#include "MMspring.h"
+#include "MMarray.h"
+#include "MMcharacter.h"
+#include "MMdatabase.h"
+#include "MMnnet.h"
+#include "MMlmm.h"
+
 #include "JWCharacter.generated.h"
 
 /**
@@ -15,7 +26,7 @@ class MOTIONMATCHING_API AJWCharacter : public AMotionMatchingCharacter
 	GENERATED_BODY()
 
 protected:
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// To add mapping context
 	virtual void BeginPlay();
@@ -26,22 +37,35 @@ protected:
 
 protected:
 
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	//UInputAction* MenuAction;
+	void draw_axis(const vec3 pos, const quat rot, const float scale = 1.0f);
 
-	//void TapKeyDown();
-	//bool IsTabButtonDown = false;
+	FVector to_Vector3(vec3 v);
 
-	/** StrafeInput Action */
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	/*UInputAction* StrafeAction;*/
-
-
-	///** Called for looking input */
-	//void OnStrafe(const FInputActionValue& Value);
-
-	//void OffStrafe(const FInputActionValue& Value);
-
-	//bool Desired_strafe = false;
-
+	void draw_features(const slice1d<float> features, const vec3 pos, const quat rot);
+	//void draw_trajectory(const slice1d<vec3> trajectory_positions, const slice1d<quat> trajectory_rotations);
 };
+
+
+
+
+
+
+
+
+//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+//UInputAction* MenuAction;
+
+//void TapKeyDown();
+//bool IsTabButtonDown = false;
+
+/** StrafeInput Action */
+//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+/*UInputAction* StrafeAction;*/
+
+
+///** Called for looking input */
+//void OnStrafe(const FInputActionValue& Value);
+
+//void OffStrafe(const FInputActionValue& Value);
+
+//bool Desired_strafe = false;
