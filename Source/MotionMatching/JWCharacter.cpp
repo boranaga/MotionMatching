@@ -25,16 +25,19 @@ void AJWCharacter::BeginPlay()
 void AJWCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-    draw_features(Features_curr, Bone_positions(0), Bone_rotations(0));
+    Draw_features(Features_curr, Bone_positions(0), Bone_rotations(0), FColor::Blue);
+
+    Draw_trajectory(Trajectory_positions, Trajectory_rotations, FColor::Orange);
+    Draw_simulation_object(Simulation_position, Simulation_rotation, FColor::Orange);
 }
 
-FVector AJWCharacter::to_Vector3(vec3 v)
+FVector AJWCharacter::To_Vector3(vec3 v)
 {
 	return FVector(v.z, -v.x, v.y);
 }
 
 
-void AJWCharacter::draw_features(const slice1d<float> features, const vec3 pos, const quat rot)
+void AJWCharacter::Draw_features(const slice1d<float> features, const vec3 pos, const quat rot, FColor color)
 {
     vec3 lfoot_pos = quat_mul_vec3(rot, vec3(features(0), features(1), features(2))) + pos;
     vec3 rfoot_pos = quat_mul_vec3(rot, vec3(features(3), features(4), features(5))) + pos;
@@ -48,60 +51,68 @@ void AJWCharacter::draw_features(const slice1d<float> features, const vec3 pos, 
     vec3 traj1_dir = quat_mul_vec3(rot, vec3(features(23), 0.0f, features(24)));
     vec3 traj2_dir = quat_mul_vec3(rot, vec3(features(25), 0.0f, features(26)));
 
-    //DrawSphereWires(to_Vector3(lfoot_pos), 0.05f, 4, 10, color);
-    //DrawSphereWires(to_Vector3(rfoot_pos), 0.05f, 4, 10, color);
-    //DrawSphereWires(to_Vector3(traj0_pos), 0.05f, 4, 10, color);
-    //DrawSphereWires(to_Vector3(traj1_pos), 0.05f, 4, 10, color);
-    //DrawSphereWires(to_Vector3(traj2_pos), 0.05f, 4, 10, color);
+    DrawDebugSphere(GetWorld(), To_Vector3(lfoot_pos), 5.0f, 8, color);
+    DrawDebugSphere(GetWorld(), To_Vector3(rfoot_pos), 5.0f, 8, color);
+    DrawDebugSphere(GetWorld(), To_Vector3(traj0_pos), 5.0f, 8, color);
+    DrawDebugSphere(GetWorld(), To_Vector3(traj1_pos), 5.0f, 8, color);
+    DrawDebugSphere(GetWorld(), To_Vector3(traj2_pos), 5.0f, 8, color);
 
-    DrawDebugSphere(GetWorld(), to_Vector3(lfoot_pos), 5.0f, 8, FColor::Red);
-    DrawDebugSphere(GetWorld(), to_Vector3(rfoot_pos), 5.0f, 8, FColor::Red);
-    DrawDebugSphere(GetWorld(), to_Vector3(traj0_pos), 5.0f, 8, FColor::Red);
-    DrawDebugSphere(GetWorld(), to_Vector3(traj1_pos), 5.0f, 8, FColor::Red);
-    DrawDebugSphere(GetWorld(), to_Vector3(traj2_pos), 5.0f, 8, FColor::Red);
-
-
-    //DrawLine3D(to_Vector3(lfoot_pos), to_Vector3(lfoot_pos + 0.1f * lfoot_vel), color);
-    //DrawLine3D(to_Vector3(rfoot_pos), to_Vector3(rfoot_pos + 0.1f * rfoot_vel), color);
-
-    //DrawLine3D(to_Vector3(traj0_pos), to_Vector3(traj0_pos + 0.25f * traj0_dir), color);
-    //DrawLine3D(to_Vector3(traj1_pos), to_Vector3(traj1_pos + 0.25f * traj1_dir), color);
-    //DrawLine3D(to_Vector3(traj2_pos), to_Vector3(traj2_pos + 0.25f * traj2_dir), color);
-
-    DrawDebugLine(GetWorld(), to_Vector3(lfoot_pos), to_Vector3(lfoot_pos + 0.1f * lfoot_vel), FColor::Red);
-    DrawDebugLine(GetWorld(), to_Vector3(rfoot_pos), to_Vector3(rfoot_pos + 0.1f * rfoot_vel), FColor::Red);
-    DrawDebugLine(GetWorld(), to_Vector3(traj0_pos), to_Vector3(traj0_pos + 0.1f * traj0_dir), FColor::Red);
-    DrawDebugLine(GetWorld(), to_Vector3(traj1_pos), to_Vector3(traj1_pos + 0.1f * traj1_dir), FColor::Red);
-    DrawDebugLine(GetWorld(), to_Vector3(traj2_pos), to_Vector3(traj2_pos + 0.1f * traj2_dir), FColor::Red);
+    DrawDebugLine(GetWorld(), To_Vector3(lfoot_pos), To_Vector3(lfoot_pos + 0.1f * lfoot_vel), color);
+    DrawDebugLine(GetWorld(), To_Vector3(rfoot_pos), To_Vector3(rfoot_pos + 0.1f * rfoot_vel), color);
+    DrawDebugLine(GetWorld(), To_Vector3(traj0_pos), To_Vector3(traj0_pos + 0.1f * traj0_dir), color);
+    DrawDebugLine(GetWorld(), To_Vector3(traj1_pos), To_Vector3(traj1_pos + 0.1f * traj1_dir), color);
+    DrawDebugLine(GetWorld(), To_Vector3(traj2_pos), To_Vector3(traj2_pos + 0.1f * traj2_dir), color);
 }
 
-//void AJWCharacter::draw_trajectory(const slice1d<vec3> trajectory_positions, const slice1d<quat> trajectory_rotations)
-//{
-//    for (int i = 1; i < trajectory_positions.size; i++)
-//    {
-//        DrawSphereWires(to_Vector3(trajectory_positions(i)), 0.05f, 4, 10, color);
-//        DrawLine3D(to_Vector3(trajectory_positions(i)), to_Vector3(
-//            trajectory_positions(i) + 0.6f * quat_mul_vec3(trajectory_rotations(i), vec3(0, 0, 1.0f))), color);
-//        DrawLine3D(to_Vector3(trajectory_positions(i - 1)), to_Vector3(trajectory_positions(i)), color);
-//    }
-//}
-
-void AJWCharacter::draw_axis(const vec3 pos, const quat rot, const float scale)
+void AJWCharacter::Draw_trajectory(const slice1d<vec3> trajectory_positions, const slice1d<quat> trajectory_rotations, FColor color)
 {
-
-	vec3 axis0 = pos + quat_mul_vec3(rot, scale * vec3(1.0f, 0.0f, 0.0f));
-	vec3 axis1 = pos + quat_mul_vec3(rot, scale * vec3(0.0f, 1.0f, 0.0f));
-	vec3 axis2 = pos + quat_mul_vec3(rot, scale * vec3(0.0f, 0.0f, 1.0f));
-
-	/*DrawLine3D(to_Vector3(pos), to_Vector3(axis0), RED);
-	DrawLine3D(to_Vector3(pos), to_Vector3(axis1), GREEN);
-	DrawLine3D(to_Vector3(pos), to_Vector3(axis2), BLUE);*/
-
-	DrawDebugLine(GetWorld(), to_Vector3(pos), to_Vector3(axis0), FColor::Red, true, -1, 100.0f);
-	DrawDebugLine(GetWorld(), to_Vector3(pos), to_Vector3(axis1), FColor::Green, true, -1, 100.0f);
-	DrawDebugLine(GetWorld(), to_Vector3(pos), to_Vector3(axis2), FColor::Blue, true, -1, 100.0f);
-
+    for (int i = 1; i < trajectory_positions.size; i++)
+    {
+        DrawDebugSphere(GetWorld(), To_Vector3(trajectory_positions(i)), 5.0f, 8, color);
+        DrawDebugLine(
+            GetWorld(),
+            To_Vector3(trajectory_positions(i)),
+            To_Vector3(trajectory_positions(i) + 60.0f * quat_mul_vec3(trajectory_rotations(i), vec3(0, 0, 1.0f))), 
+            color);
+        DrawDebugLine(GetWorld(), To_Vector3(trajectory_positions(i - 1)), To_Vector3(trajectory_positions(i)), color);
+    }
 }
+
+void AJWCharacter::Draw_simulation_object(const vec3 simulation_position, quat simulation_rotation, FColor color)
+{
+    DrawDebugCircle(GetWorld(), To_Vector3(simulation_position), 60.0f, 60.0f, color, false, -1, 2, 2, FVector(0, 1, 0), FVector(1, 0, 0), false);
+    DrawDebugSphere(GetWorld(), To_Vector3(simulation_position), 5.0f, 16, color);
+    DrawDebugLine(
+        GetWorld(),
+        To_Vector3(simulation_position),
+        To_Vector3(simulation_position + 0.6f * quat_mul_vec3(simulation_rotation, vec3(0.0f, 0.0f, 1.0f))),
+        color
+        );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//void AJWCharacter::Draw_axis(const vec3 pos, const quat rot, const float scale)
+//{
+//	vec3 axis0 = pos + quat_mul_vec3(rot, scale * vec3(1.0f, 0.0f, 0.0f));
+//	vec3 axis1 = pos + quat_mul_vec3(rot, scale * vec3(0.0f, 1.0f, 0.0f));
+//	vec3 axis2 = pos + quat_mul_vec3(rot, scale * vec3(0.0f, 0.0f, 1.0f));
+//
+//	DrawDebugLine(GetWorld(), To_Vector3(pos), To_Vector3(axis0), FColor::Red, true, -1, 100.0f);
+//	DrawDebugLine(GetWorld(), To_Vector3(pos), To_Vector3(axis1), FColor::Green, true, -1, 100.0f);
+//	DrawDebugLine(GetWorld(), To_Vector3(pos), To_Vector3(axis2), FColor::Blue, true, -1, 100.0f);
+//}
 
 
 

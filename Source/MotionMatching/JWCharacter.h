@@ -36,13 +36,11 @@ protected:
 
 
 protected:
+	FVector To_Vector3(vec3 v);
 
-	void draw_axis(const vec3 pos, const quat rot, const float scale = 1.0f);
-
-	FVector to_Vector3(vec3 v);
-
-	void draw_features(const slice1d<float> features, const vec3 pos, const quat rot);
-	//void draw_trajectory(const slice1d<vec3> trajectory_positions, const slice1d<quat> trajectory_rotations);
+	void Draw_features(const slice1d<float> features, const vec3 pos, const quat rot, FColor color);
+	void Draw_trajectory(const slice1d<vec3> trajectory_positions, const slice1d<quat> trajectory_rotations, FColor color);
+	void Draw_simulation_object(const vec3 simulation_position, quat simulation_rotation, FColor color);
 };
 
 
@@ -51,7 +49,8 @@ protected:
 
 
 
-
+//void Draw_axis(const vec3 pos, const quat rot, const float scale = 1.0f);
+// 
 //UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 //UInputAction* MenuAction;
 
