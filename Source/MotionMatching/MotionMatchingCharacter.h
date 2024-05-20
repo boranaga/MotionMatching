@@ -248,7 +248,8 @@ protected: //Motion Matching 관련 variables
 	float Desired_gait = 0.0f;
 	float Desired_gait_velocity = 0.0f;
 
-	vec3 Simulation_position = vec3(0, 0.9f, 0); //초기 값 설정 //(x, y, z) -> (z, x, y)로 변함
+	//vec3 Simulation_position = vec3(0, 0.9f, 0); //초기 값 설정 //(x, y, z) -> (z, x, y)로 변함
+	vec3 Simulation_position = vec3(0, 0.0f, 0); //초기 값 설정 //(x, y, z) -> (z, x, y)로 변함
 	vec3 Simulation_velocity;
 	vec3 Simulation_acceleration;
 	quat Simulation_rotation;
