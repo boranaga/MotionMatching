@@ -13,6 +13,7 @@
 #include "MMPlayerController.h"
 
 #include "Kismet/GameplayStatics.h" //GetPlyaerController 함수 불러오려고 추가함
+#include "DrawDebugHelpers.h" //Debug 구체 visualizaiton을 위해 추가함
 
 #include "Components/PoseableMeshComponent.h"
 
@@ -129,6 +130,7 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 
 	MotionMatchingMainTick();
 
+	//UI
 	if (LMM_enabled)
 	{
 		UE_LOG(LogTemp, Log, TEXT("LMM ON"));
@@ -197,6 +199,10 @@ void AMotionMatchingCharacter::SetupPlayerInputComponent(UInputComponent* Player
 
 		EnhancedInputComponent->BindAction(ZoomOutAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::CamZoomOutOn);
 		EnhancedInputComponent->BindAction(ZoomOutAction, ETriggerEvent::Completed, this, &AMotionMatchingCharacter::CamZoomOutOff);
+
+		// Gait
+		EnhancedInputComponent->BindAction(GaitAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::GaitButtonOn);
+		EnhancedInputComponent->BindAction(GaitAction, ETriggerEvent::Completed, this, &AMotionMatchingCharacter::GaitButtonOff);
 
 		// MenuUI
 		EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::TapKeyDown);
@@ -302,6 +308,18 @@ void AMotionMatchingCharacter::CamZoomOutOff(const FInputActionValue& Value)
 	CamZoomOut = false;
 }
 
+void AMotionMatchingCharacter::GaitButtonOn(const FInputActionValue& Value)
+{
+	GaitButton = true;
+}
+
+void AMotionMatchingCharacter::GaitButtonOff(const FInputActionValue& Value)
+{
+	GaitButton = false;
+}
+
+
+
 void AMotionMatchingCharacter::TapKeyDown()
 {
 	AMMPlayerController* PlayerController = Cast<AMMPlayerController>(Controller);
@@ -404,10 +422,71 @@ void AMotionMatchingCharacter::SetCharacterAnimation() {
 
 }
 
+//------------------------------------------------------
+
+FVector AMotionMatchingCharacter::To_Vector3(vec3 v)
+{
+	float scale = 100;
+
+	return FVector(v.z * scale, -v.x * scale, v.y * scale);
+}																															
+													
+
+void AMotionMatchingCharacter::Draw_features(const slice1d<float> features, const vec3 pos, const quat rot, FColor color)
+{												
+	vec3 lfoot_pos = quat_mul_vec3(rot, vec3(features(0), features(1), features(2))) + pos;
+	vec3 rfoot_pos = quat_mul_vec3(rot, vec3(features(3), features(4), features(5))) + pos;
+	vec3 lfoot_vel = quat_mul_vec3(rot, vec3(features(6), features(7), features(8)));
+	vec3 rfoot_vel = quat_mul_vec3(rot, vec3(features(9), features(10), features(11)));
+	//vec3 hip_vel   = quat_mul_vec3(rot, vec3(features(12), features(13), features(14)));
+	vec3 traj0_pos = quat_mul_vec3(rot, vec3(features(15), 0.0f, features(16))) + pos;
+	vec3 traj1_pos = quat_mul_vec3(rot, vec3(features(17), 0.0f, features(18))) + pos;
+	vec3 traj2_pos = quat_mul_vec3(rot, vec3(features(19), 0.0f, features(20))) + pos;
+	vec3 traj0_dir = quat_mul_vec3(rot, vec3(features(21), 0.0f, features(22)));
+	vec3 traj1_dir = quat_mul_vec3(rot, vec3(features(23), 0.0f, features(24)));
+	vec3 traj2_dir = quat_mul_vec3(rot, vec3(features(25), 0.0f, features(26)));
+
+	DrawDebugSphere(GetWorld(), To_Vector3(lfoot_pos), 5.0f, 8, color);
+	DrawDebugSphere(GetWorld(), To_Vector3(rfoot_pos), 5.0f, 8, color);
+	DrawDebugSphere(GetWorld(), To_Vector3(traj0_pos), 5.0f, 8, color);
+	DrawDebugSphere(GetWorld(), To_Vector3(traj1_pos), 5.0f, 8, color);
+	DrawDebugSphere(GetWorld(), To_Vector3(traj2_pos), 5.0f, 8, color);
+
+	DrawDebugLine(GetWorld(), To_Vector3(lfoot_pos), To_Vector3(lfoot_pos + 0.1f * lfoot_vel), color);
+	DrawDebugLine(GetWorld(), To_Vector3(rfoot_pos), To_Vector3(rfoot_pos + 0.1f * rfoot_vel), color);
+	DrawDebugLine(GetWorld(), To_Vector3(traj0_pos), To_Vector3(traj0_pos + 0.1f * traj0_dir), color);
+	DrawDebugLine(GetWorld(), To_Vector3(traj1_pos), To_Vector3(traj1_pos + 0.1f * traj1_dir), color);
+	DrawDebugLine(GetWorld(), To_Vector3(traj2_pos), To_Vector3(traj2_pos + 0.1f * traj2_dir), color);
+}
+
+void AMotionMatchingCharacter::Draw_trajectory(const slice1d<vec3> trajectory_positions, const slice1d<quat> trajectory_rotations, FColor color)
+{
+	for (int i = 1; i < trajectory_positions.size; i++)
+	{
+		DrawDebugSphere(GetWorld(), To_Vector3(trajectory_positions(i)), 5.0f, 8, color);
+		DrawDebugLine(
+			GetWorld(),
+			To_Vector3(trajectory_positions(i)),
+			To_Vector3(trajectory_positions(i) + 60.0f * quat_mul_vec3(trajectory_rotations(i), vec3(0, 0, 1.0f))),
+			color);
+		DrawDebugLine(GetWorld(), To_Vector3(trajectory_positions(i - 1)), To_Vector3(trajectory_positions(i)), color);
+	}
+}
+
+void AMotionMatchingCharacter::Draw_simulation_object(const vec3 simulation_position, quat simulation_rotation, FColor color)
+{
+	DrawDebugCircle(GetWorld(), To_Vector3(simulation_position), 60.0f, 60.0f, color, false, -1, 2, 2, FVector(0, 1, 0), FVector(1, 0, 0), false);
+	DrawDebugSphere(GetWorld(), To_Vector3(simulation_position), 5.0f, 16, color);
+	DrawDebugLine(
+		GetWorld(),
+		To_Vector3(simulation_position),
+		To_Vector3(simulation_position + 0.6f * quat_mul_vec3(simulation_rotation, vec3(0.0f, 0.0f, 1.0f))),
+		color
+	);
+}
 
 
-
-
+//------------------------------------------------------
 
 
 float AMotionMatchingCharacter::orbit_camera_update_azimuth(
@@ -416,10 +495,10 @@ float AMotionMatchingCharacter::orbit_camera_update_azimuth(
 	const bool desired_strafe,
 	const float dt)
 {
-	float speed = 5; //회전 속도
+	//float speed = 5; //회전 속도
 
 	vec3 gamepadaxis = desired_strafe ? vec3() : gamepadstick_right;
-	return azimuth + 2.0f * dt * -gamepadaxis.x * speed * (-1); //(-1) 곱해줘야함
+	return azimuth + 2.0f * dt * -gamepadaxis.x * CamRotationInputSpeed * (-1); //(-1) 곱해줘야함
 }
 
 float AMotionMatchingCharacter::orbit_camera_update_altitude(
@@ -428,10 +507,10 @@ float AMotionMatchingCharacter::orbit_camera_update_altitude(
 	const bool desired_strafe,
 	const float dt)
 {
-	float speed = 5; //회전 속도
+	//float speed = 5; //회전 속도
 
 	vec3 gamepadaxis = desired_strafe ? vec3() : gamepadstick_right;
-	return clampf(altitude + 2.0f * dt * gamepadaxis.z * speed * (-1), 0.0, 0.4f * PIf); //(-1) 곱해줘야함
+	return clampf(altitude + 2.0f * dt * gamepadaxis.z * CamRotationInputSpeed * (-1), 0.0, 0.4f * PIf); //(-1) 곱해줘야함
 }
 
 
@@ -509,7 +588,7 @@ void AMotionMatchingCharacter::desired_gait_update(
 	simple_spring_damper_exact( //MMspring.h에서 구현
 		desired_gait,
 		desired_gait_velocity,
-		Cast<APlayerController>(Controller)->IsInputKeyDown(EKeys::A) ? 1.0f : 0.0f,
+		GaitButton ? 1.0f : 0.0f,
 		gait_change_halflife,
 		dt);
 }
@@ -616,9 +695,6 @@ void inertialize_root_adjust(
 	rotation = quat_mul(rotation_difference, rotation);
 	transition_dst_rotation = quat_mul(rotation_difference, transition_dst_rotation);
 }
-
-
-
 
 
 
@@ -1623,9 +1699,7 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 
 	vec3 gamepadstick_left = vec3(LeftStickValue2D.X, 0.0f, LeftStickValue2D.Y *(-1)); //Y에 (-1)을 곱해주었음
 
-	vec3 gamepadstick_right = vec3(RightStickValue2D.X, 0.0f, RightStickValue2D.Y);
-
-
+	vec3 gamepadstick_right = vec3(RightStickValue2D.X * (-1), 0.0f, RightStickValue2D.Y * (-1));
 
 
 	// Get the desired gait (walk / run)
@@ -2230,13 +2304,14 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 		Desired_strafe,
 		DeltaT);
 	
-
-	//// Render
-	// Draw Simulation Object
-	// 
+	// Render
 	SetSimulationObj();
-
 	SetCharacterAnimation();
+
+
+	Draw_features(Features_curr, Bone_positions(0), Bone_rotations(0), FColor::Blue);
+	Draw_trajectory(Trajectory_positions, Trajectory_rotations, FColor::Orange);
+	Draw_simulation_object(Simulation_position, Simulation_rotation, FColor::Orange);
 
 	//// Draw Clamping Radius/Angles
 	//if (clamping_enabled)
@@ -2681,6 +2756,18 @@ void AMotionMatchingCharacter::InputLog()
 	{
 		;
 	}
+
+	//-------------------------------------------
+	//Gait input 테스트
+	if (GaitButton == true)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Gait button on"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Gait button off"));
+	}
+
 
 
 }

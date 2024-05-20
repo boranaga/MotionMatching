@@ -67,6 +67,11 @@ class AMotionMatchingCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ZoomOutAction;
 
+	/** Gait Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* GaitAction;
+
+	/** Menu Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MenuAction;
 
@@ -98,6 +103,12 @@ protected:
 
 	void CamZoomOutOff(const FInputActionValue& Value);
 
+	/** Called for gait input */
+	void GaitButtonOn(const FInputActionValue& Value);
+
+	void GaitButtonOff(const FInputActionValue& Value);
+
+	/** Called for MenuUI input */
 	void TapKeyDown();
 
 protected:
@@ -156,17 +167,6 @@ protected: //Motion Matching 관련 variables
 	TArray<FRotator> BasicCharatorRotator;
 	//스켈레톤의 기본 position(vector) 값 저장
 	TArray<FVector> BasicCharatorVector;
-
-
-	// Camera
-	//Camera3D camera = { 0 }; //->raylib에서 사용하는 객체같은데 이 코드(" { 0 } ")가 무엇을 의미하는 것일까
-	// -> 언리얼의 카메라 객체에 접근하자
-	//camera.position = (Vector3){ 0.0f, 10.0f, 10.0f }; //나중에 기본(시작) 값 설정하는 함수 만들 예정임 
-	//camera.target = (Vector3){ 0.0f, 0.0f, 0.0f }; //나중에 기본(시작) 값 설정하는 함수 만들 예정임
-	//camera.up = (Vector3){ 0.0f, 1.0f, 0.0f }; //필요 없음
-	//camera.fovy = 45.0f; //필요 없음
-	//camera.projection = CAMERA_PERSPECTIVE; //필요 없음
-
 
 	float Camera_azimuth = 0.0f;
 	float Camera_altitude = 0.4f * 100;
@@ -254,26 +254,26 @@ protected: //Motion Matching 관련 variables
 	quat Simulation_rotation;
 	vec3 Simulation_angular_velocity;
 
-	float Simulation_velocity_halflife = 0.27f; //이 값들이 이 후 게임 로직 중에 수정되는지 아닌지 확인해 봐야함(수정된다면 여기서 값을 정의 하는것이 좋지 않을 듯함)
+	float Simulation_velocity_halflife = 0.27f;
 	float Simulation_rotation_halflife = 0.27f;
 
 
 	// All speeds in m/s
-	float Simulation_run_fwrd_speed = 4.0f;
-	float Simulation_run_side_speed = 3.0f;
-	float Simulation_run_back_speed = 2.5f;
+	//float Simulation_run_fwrd_speed = 4.0f;
+	//float Simulation_run_side_speed = 3.0f;
+	//float Simulation_run_back_speed = 2.5f;
 
-	float Simulation_walk_fwrd_speed = 1.75f;
-	float Simulation_walk_side_speed = 1.5f;
-	float Simulation_walk_back_speed = 1.25f;
+	//float Simulation_walk_fwrd_speed = 1.75f;
+	//float Simulation_walk_side_speed = 1.5f;
+	//float Simulation_walk_back_speed = 1.25f;
 	// 
-	//float Simulation_run_fwrd_speed = 4.0f * 2;
-	//float Simulation_run_side_speed = 3.0f * 2;
-	//float Simulation_run_back_speed = 2.5f * 2;
+	float Simulation_run_fwrd_speed = 4.0f * 2;
+	float Simulation_run_side_speed = 3.0f * 2;
+	float Simulation_run_back_speed = 2.5f * 2;
 
-	////float Simulation_walk_fwrd_speed = 1.75f * 2;
-	////float Simulation_walk_side_speed = 1.5f * 2;
-	////float Simulation_walk_back_speed = 1.25f * 2;
+	float Simulation_walk_fwrd_speed = 1.75f * 2;
+	float Simulation_walk_side_speed = 1.5f * 2;
+	float Simulation_walk_back_speed = 1.25f * 2;
 
 	//float Simulation_walk_fwrd_speed = 1.75f * 5;
 	//float Simulation_walk_side_speed = 1.5f * 5;
@@ -356,7 +356,11 @@ protected: //Motion Matching 관련 variables
 	bool CamZoomIn = false;
 	bool CamZoomOut = false;
 
+	bool GaitButton = false;
+
 	bool IsTabButtonDown = false; //Menu
+
+	float CamRotationInputSpeed = 2;
 
 	FVector2D RightStickValue2D;
 	FVector2D LeftStickValue2D;
@@ -407,7 +411,12 @@ public: //Motion Matching 관련
 	void SetSimulationObj();
 	void SetCharacterAnimation();
 
+	//Draw Debug spheres
+	FVector To_Vector3(vec3 v);
 
+	void Draw_features(const slice1d<float> features, const vec3 pos, const quat rot, FColor color);
+	void Draw_trajectory(const slice1d<vec3> trajectory_positions, const slice1d<quat> trajectory_rotations, FColor color);
+	void Draw_simulation_object(const vec3 simulation_position, quat simulation_rotation, FColor color);
 
 	//-------------------------------------------------------------------
 	//오렌지 덕의 controller.cpp에 정의되어 있는 함수들
@@ -719,17 +728,4 @@ public:
 	UFUNCTION()
 	void SetCharacterRotationRest(); //캐릭터의 rotation을 bone_rest_rotations으로 설정
 
-};
-
-
-//------------------------------------------------------------
-enum
-{
-	GAMEPAD_PLAYER = 0,
-};
-
-enum
-{
-	GAMEPAD_STICK_LEFT, //0
-	GAMEPAD_STICK_RIGHT, //1
 };
