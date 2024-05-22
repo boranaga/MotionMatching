@@ -468,7 +468,7 @@ void AMotionMatchingCharacter::Draw_trajectory(const slice1d<vec3> trajectory_po
 		DrawDebugLine(
 			GetWorld(),
 			To_Vector3(trajectory_positions(i)),
-			To_Vector3(trajectory_positions(i) + 60.0f * quat_mul_vec3(trajectory_rotations(i), vec3(0, 0, 1.0f))),
+			To_Vector3(trajectory_positions(i) + 0.6f * quat_mul_vec3(trajectory_rotations(i), vec3(0, 0, 1.0f))),
 			color);
 		DrawDebugLine(GetWorld(), To_Vector3(trajectory_positions(i - 1)), To_Vector3(trajectory_positions(i)), color);
 	}
