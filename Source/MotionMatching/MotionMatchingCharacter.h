@@ -119,7 +119,7 @@ protected:
 	virtual void BeginPlay();
 
 	// Tick 함수
-	virtual void Tick(float DeltaTime) override; //override를 안하고 그냥 사용은 안되나?
+	virtual void Tick(float DeltaTime) override;
 
 	//매초마다 이벤트를 발생시키게 하기 위한 타이머
 	float TickTime;
@@ -387,8 +387,6 @@ public: //poseblemesh 관련
 
 public: //Motion Matching 관련
 	
-
-	//기본 베이스 및 내가 추가한 것
 	UFUNCTION()
 	void MotionMatchingMainBeginPlay(); //MotionMatching에 사용할 초기 데이터 load 함수 등이 포함됨(초기 변수 초기화)
 
@@ -420,8 +418,6 @@ public: //Motion Matching 관련
 	void Draw_simulation_object(const vec3 simulation_position, quat simulation_rotation, FColor color);
 
 	//-------------------------------------------------------------------
-	//오렌지 덕의 controller.cpp에 정의되어 있는 함수들
-
 	float orbit_camera_update_azimuth(
 		const float azimuth,
 		const vec3 gamepadstick_right,
