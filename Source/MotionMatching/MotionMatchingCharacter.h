@@ -175,11 +175,11 @@ protected: //Motion Matching 관련 variables
 
 	// Scene Obstacles
 	//일단 obstacle이 존재하지 않는다고 가정함
-	//UPROPERTY()
-	//TArray<AActor*> OutActors;
+	UPROPERTY()
+	TArray<AActor*> OutActors;
 
 	//UPROPERTY(EditAnywhere, Category = "Obstacle")
-	//TSubclassOf<AActor> ActorClass;
+	TSubclassOf<AActor> ActorClass;
 
 	array1d<vec3> Obstacles_positions = array1d<vec3>(0);
 	array1d<vec3> Obstacles_scales = array1d<vec3>(0);
