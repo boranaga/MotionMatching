@@ -116,12 +116,12 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 	//-------------------------------------------------------------
 	//Tick 함수가 잘 작동하는지 테스트
 	//초 단위로 출력
-	TickTime += DeltaTime;
-	if (TickTime >= 1) {
-		UE_LOG(LogTemp, Log, TEXT("%d Seconds has passed."), TimePassed);
-		TimePassed += 1;
-		TickTime = 0.0f;
-	}
+	//TickTime += DeltaTime;
+	//if (TickTime >= 1) {
+	//	UE_LOG(LogTemp, Log, TEXT("%d Seconds has passed."), TimePassed);
+	//	TimePassed += 1;
+	//	TickTime = 0.0f;
+	//}
 	//-------------------------------------------------------------
 	//Input이 잘 작동하는지 테스트
 	InputLog();
@@ -422,6 +422,35 @@ void AMotionMatchingCharacter::SetCharacterAnimation() {
 
 
 }
+
+
+//-----------------------------------------------------
+void AMotionMatchingCharacter::GetObstaclesinfo()
+{
+	//float scale = 100;
+
+	//if (ActorClass)
+	//{
+	//	UGameplayStatics::GetAllActorsOfClass(this, ActorClass, OutActors);
+	//	//UE_LOG(LogTemp, Log, TEXT("Number of Actors: %d"), OutActors.Num());
+
+	//	Obstacles_positions.resize(OutActors.Num());
+	//	Obstacles_scales.resize(OutActors.Num());
+	//}
+
+	//for (int i = 0; i < OutActors.Num(); i++)
+	//{
+	//	FVector ActorLocation = OutActors[i]->GetActorLocation() / scale;
+	//	FVector ActorScale = OutActors[i]->GetActorScale() / scale;
+
+	//	Obstacles_positions(i) = vec3(ActorLocation.Z, -ActorLocation.X, ActorLocation.Y);
+	//	Obstacles_scales(i) = vec3(ActorScale.Z, -ActorScale.X, ActorScale.Y);
+
+	//	//UE_LOG(LogTemp, Log, TEXT("%f       %f        %f"), ActorScale.X, ActorScale.Y, ActorScale.Z);
+	//}
+}
+
+
 
 //------------------------------------------------------
 
@@ -1512,6 +1541,9 @@ quat AMotionMatchingCharacter::clamp_character_rotation(
 //---------------------------------------------------------------------
 
 void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
+
+	// Set obstacles
+	//GetObstaclesinfo();
 
 
 	// Character
@@ -2777,6 +2809,21 @@ void AMotionMatchingCharacter::InputLog()
 		UE_LOG(LogTemp, Log, TEXT("Gait button off"));
 	}
 
+
+	//-----------------------------------
+	//Obstacle이 저장되었는지 확인
+	//array1d<vec3> Obstacles_positions = array1d<vec3>(0);
+	//array1d<vec3> Obstacles_scales = array1d<vec3>(0);
+	//UE_LOG(LogTemp, Log, TEXT("Num of Obstacles : %f"), Obstacles_positions.size);
+	//for (int i = 0; i < Obstacles_positions.size; i++) {
+
+	//	UE_LOG(LogTemp, Log, TEXT("Obstacle %i position: x: %f, y: %f, z: %f"), i, Obstacles_positions.data[i].x, Obstacles_positions.data[i].y, Obstacles_positions.data[i].z);
+
+	//}
+
+	//--------------------------------------
+	//Log Delta time
+	UE_LOG(LogTemp, Log, TEXT("Delta Time: %f"), DeltaT);
 
 
 }

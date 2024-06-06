@@ -38,25 +38,25 @@ void AJWCharacter::Tick(float DeltaTime)
 void AJWCharacter::GetObstaclesinfo()
 {
 
-	if (ActorClass)
-	{
-		UGameplayStatics::GetAllActorsOfClass(this, ActorClass, OutActors);
-		//UE_LOG(LogTemp, Log, TEXT("Number of Actors: %d"), OutActors.Num());
+	//if (ActorClass)
+	//{
+	//	UGameplayStatics::GetAllActorsOfClass(this, ActorClass, OutActors);
+	//	//UE_LOG(LogTemp, Log, TEXT("Number of Actors: %d"), OutActors.Num());
 
-		Obstacles_positions.resize(OutActors.Num());
-		Obstacles_scales.resize(OutActors.Num());
-	}
+	//	Obstacles_positions.resize(OutActors.Num());
+	//	Obstacles_scales.resize(OutActors.Num());
+	//}
 
-	for (int i = 0; i < OutActors.Num(); i++)
-	{
-		FVector ActorLocation = OutActors[i]->GetActorLocation() / 100;
-		FVector ActorScale = OutActors[i]->GetActorScale() / 100;
-		
-		Obstacles_positions(i) = vec3(ActorLocation.Z, -ActorLocation.X, ActorLocation.Y);
-		Obstacles_scales(i) = vec3(ActorScale.Z, -ActorScale.X, ActorScale.Y);
+	//for (int i = 0; i < OutActors.Num(); i++)
+	//{
+	//	FVector ActorLocation = OutActors[i]->GetActorLocation() / 100;
+	//	FVector ActorScale = OutActors[i]->GetActorScale() / 100;
+	//	
+	//	Obstacles_positions(i) = vec3(ActorLocation.Z, -ActorLocation.X, ActorLocation.Y);
+	//	Obstacles_scales(i) = vec3(ActorScale.Z, -ActorScale.X, ActorScale.Y);
 
-		//UE_LOG(LogTemp, Log, TEXT("%f       %f        %f"), ActorScale.X, ActorScale.Y, ActorScale.Z);
-	}
+	//	//UE_LOG(LogTemp, Log, TEXT("%f       %f        %f"), ActorScale.X, ActorScale.Y, ActorScale.Z);
+	//}
 }
 
 

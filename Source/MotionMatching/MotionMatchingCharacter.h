@@ -175,6 +175,12 @@ protected: //Motion Matching 관련 variables
 
 	// Scene Obstacles
 	//일단 obstacle이 존재하지 않는다고 가정함
+	//UPROPERTY()
+	//TArray<AActor*> OutActors;
+
+	//UPROPERTY(EditAnywhere, Category = "Obstacle")
+	//TSubclassOf<AActor> ActorClass;
+
 	array1d<vec3> Obstacles_positions = array1d<vec3>(0);
 	array1d<vec3> Obstacles_scales = array1d<vec3>(0);
 
@@ -348,7 +354,9 @@ protected: //Motion Matching 관련 variables
 	array1d<float> Latent_curr = array1d<float>(32);
 
 	//DeltTime(FrameRate)
+	//float DeltaT = 1.0f / 60.0f; //dt
 	float DeltaT = 1.0f / 60.0f; //dt
+
 
 	//Input Data
 	UPROPERTY()
@@ -406,6 +414,10 @@ public: //Motion Matching 관련
 	void InputLog();
 	
 	//-------------------------------------------------------------------
+	//Get obstacles informations
+	void GetObstaclesinfo();
+
+
 	//Set Simulation object, Set Animation
 	void SetSimulationObj();
 	void SetCharacterAnimation();
@@ -724,5 +736,6 @@ public:
 
 	UFUNCTION()
 	void SetCharacterRotationRest(); //캐릭터의 rotation을 bone_rest_rotations으로 설정
+
 
 };
