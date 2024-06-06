@@ -440,10 +440,9 @@ void AMotionMatchingCharacter::GetObstaclesinfo()
 
 	UWorld* World = GetWorld();
 
-
-
 	if (ActorClass)
 	{
+		//UGameplayStatics::GetAllActorsOfClass(this, ActorClass, OutActors); //이것도 가능
 		UGameplayStatics::GetAllActorsOfClass(World, ActorClass, OutActors);
 		UE_LOG(LogTemp, Log, TEXT("Number of Actors: %d"), OutActors.Num());
 
@@ -452,56 +451,29 @@ void AMotionMatchingCharacter::GetObstaclesinfo()
 	}
 
 
-
-	//UGameplayStatics::GetAllActorsOfClass(World, AActor::StaticClass(), OutActors);
-	//UGameplayStatics::GetAllActorsOfClass(this, ActorClass, OutActors);
-	//UE_LOG(LogTemp, Log, TEXT("Number of Actors: %d"), OutActors.Num());
-
-
-	//UGameplayStatics::GetAllActorsOfClass(World, , )
-
-
 	Obstacles_positions.resize(OutActors.Num());
 	Obstacles_scales.resize(OutActors.Num());
-
-
 
 	for (int i = 0; i < OutActors.Num(); i++)
 	{
 		FVector ActorLocation = OutActors[i]->GetActorLocation() / scale;
-		FVector ActorScale = OutActors[i]->GetActorScale() / scale;
 
-		Obstacles_positions(i) = vec3(ActorLocation.Z, -ActorLocation.X, ActorLocation.Y);
-		Obstacles_scales(i) = vec3(ActorScale.Z, -ActorScale.X, ActorScale.Y);
+		Obstacles_positions(i) = vec3(-ActorLocation.Y, ActorLocation.Z, ActorLocation.X);
 
-		UE_LOG(LogTemp, Log, TEXT("%f       %f        %f"), ActorScale.X, ActorScale.Y, ActorScale.Z);
+
+		// 스태틱 메시 컴포넌트를 찾음
+		UStaticMeshComponent* MeshComponent = OutActors[i]->FindComponentByClass<UStaticMeshComponent>();
+		if (MeshComponent)
+		{
+			// 메시 컴포넌트의 바운드를 가져옴
+			FVector CubeBounds = MeshComponent->Bounds.BoxExtent;
+
+			// 실제 크기를 계산
+			FVector ActualCubeSize = CubeBounds * 2.0f / scale; // BoxExtent가 반지름이기 때문에 2를 곱함
+
+			Obstacles_scales(i) = vec3(ActualCubeSize.Y, ActualCubeSize.Z, ActualCubeSize.X); //좌표계 변환
+		}
 	}
-
-
-	//----------------------------------------------
-
-	//UWorld* World;
-	//if (!World)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("World is null"));
-	//	return;
-	//}
-
-	//for (TActorIterator<AActor> It(World); It; ++It)
-	//{
-	//	AActor* Actor = *It;
-	//	if (Actor)
-	//	{
-	//		FVector Location = Actor->GetActorLocation();
-	//		UE_LOG(LogTemp, Log, TEXT("Actor: %s, Location: %s"), *Actor->GetName(), *Location.ToString());
-	//	}
-	//}
-
-
-
-
-
-
 }
 
 
@@ -2877,7 +2849,11 @@ void AMotionMatchingCharacter::InputLog()
 
 	}
 
+	for (int i = 0; i < Obstacles_scales.size; i++) {
 
+		UE_LOG(LogTemp, Log, TEXT("Obstacle %i scale: x: %f, y: %f, z: %f"), i, Obstacles_scales.data[i].x, Obstacles_scales.data[i].y, Obstacles_scales.data[i].z);
+
+	}
 
 
 	//--------------------------------------
