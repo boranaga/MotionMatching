@@ -2778,5 +2778,9 @@ void AMotionMatchingCharacter::InputLog()
 	}
 
 
+	//------------------------------------
+	//Delta time
+	UE_LOG(LogTemp, Log, TEXT("Delta Time: %f"), DeltaT);
+
 
 }
