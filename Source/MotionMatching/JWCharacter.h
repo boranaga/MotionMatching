@@ -37,11 +37,11 @@ protected:
 
 protected:
 
-	UPROPERTY()
-	TArray<AActor*> OutActors;
-	
-	UPROPERTY(EditAnywhere, Category = "Obstacle")
-	TSubclassOf<AActor> ActorClass;
+	//UPROPERTY()
+	//TArray<AActor*> OutActors;
+	//
+	//UPROPERTY(EditAnywhere, Category = "Obstacle")
+	//TSubclassOf<AActor> ActorClass;
 
 	void GetObstaclesinfo();
 };

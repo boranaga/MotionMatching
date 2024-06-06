@@ -15,6 +15,12 @@
 #include "Kismet/GameplayStatics.h" //GetPlyaerController 함수 불러오려고 추가함
 #include "DrawDebugHelpers.h" //Debug 구체 visualizaiton을 위해 추가함
 
+
+#include "Engine/World.h" //world의 정보를 불러오기 위해 추가
+#include "GameFramework/Actor.h"
+//#include "Engine/Engine.h
+
+
 #include "Components/PoseableMeshComponent.h"
 
 
@@ -97,6 +103,11 @@ void AMotionMatchingCharacter::BeginPlay()
 	//Character skeleton의 기본 vector 값을 배열로 저장
 	SaveBasicVectors();
 
+
+	// Set obstacles
+	GetObstaclesinfo();
+
+
 	//MotionMatching BeginPlay
 	MotionMatchingMainBeginPlay();
 
@@ -116,12 +127,12 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 	//-------------------------------------------------------------
 	//Tick 함수가 잘 작동하는지 테스트
 	//초 단위로 출력
-	TickTime += DeltaTime;
-	if (TickTime >= 1) {
-		UE_LOG(LogTemp, Log, TEXT("%d Seconds has passed."), TimePassed);
-		TimePassed += 1;
-		TickTime = 0.0f;
-	}
+	//TickTime += DeltaTime;
+	//if (TickTime >= 1) {
+	//	UE_LOG(LogTemp, Log, TEXT("%d Seconds has passed."), TimePassed);
+	//	TimePassed += 1;
+	//	TickTime = 0.0f;
+	//}
 	//-------------------------------------------------------------
 	//Input이 잘 작동하는지 테스트
 	InputLog();
@@ -422,6 +433,62 @@ void AMotionMatchingCharacter::SetCharacterAnimation() {
 
 
 }
+
+
+//-----------------------------------------------------
+void AMotionMatchingCharacter::GetObstaclesinfo()
+{
+	float scale = 100;
+
+	if (ActorClass)
+	{
+		UGameplayStatics::GetAllActorsOfClass(this, ActorClass, OutActors);
+		UE_LOG(LogTemp, Log, TEXT("Number of Actors: %d"), OutActors.Num());
+
+		Obstacles_positions.resize(OutActors.Num());
+		Obstacles_scales.resize(OutActors.Num());
+	}
+
+
+	for (int i = 0; i < OutActors.Num(); i++)
+	{
+		FVector ActorLocation = OutActors[i]->GetActorLocation() / scale;
+		FVector ActorScale = OutActors[i]->GetActorScale() / scale;
+
+		Obstacles_positions(i) = vec3(ActorLocation.Z, -ActorLocation.X, ActorLocation.Y);
+		Obstacles_scales(i) = vec3(ActorScale.Z, -ActorScale.X, ActorScale.Y);
+
+		UE_LOG(LogTemp, Log, TEXT("%f       %f        %f"), ActorScale.X, ActorScale.Y, ActorScale.Z);
+	}
+
+
+	//----------------------------------------------
+
+	//UWorld* World;
+	//if (!World)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("World is null"));
+	//	return;
+	//}
+
+	//for (TActorIterator<AActor> It(World); It; ++It)
+	//{
+	//	AActor* Actor = *It;
+	//	if (Actor)
+	//	{
+	//		FVector Location = Actor->GetActorLocation();
+	//		UE_LOG(LogTemp, Log, TEXT("Actor: %s, Location: %s"), *Actor->GetName(), *Location.ToString());
+	//	}
+	//}
+
+
+
+
+
+
+}
+
+
 
 //------------------------------------------------------
 
@@ -1512,6 +1579,9 @@ quat AMotionMatchingCharacter::clamp_character_rotation(
 //---------------------------------------------------------------------
 
 void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
+
+	// Set obstacles
+	//GetObstaclesinfo();
 
 
 	// Character
@@ -2778,8 +2848,21 @@ void AMotionMatchingCharacter::InputLog()
 	}
 
 
-	//------------------------------------
-	//Delta time
+	//-----------------------------------
+	//Obstacle이 저장되었는지 확인
+	//array1d<vec3> Obstacles_positions = array1d<vec3>(0);
+	//array1d<vec3> Obstacles_scales = array1d<vec3>(0);
+
+	UE_LOG(LogTemp, Log, TEXT("Num of Obstacles : %f"), Obstacles_positions.size);
+
+	//for (int i = 0; i < Obstacles_positions.size; i++) {
+
+	//	UE_LOG(LogTemp, Log, TEXT("Obstacle %i position: x: %f, y: %f, z: %f"), i, Obstacles_positions.data[i].x, Obstacles_positions.data[i].y, Obstacles_positions.data[i].z);
+
+	//}
+
+	//--------------------------------------
+	//Log Delta time
 	UE_LOG(LogTemp, Log, TEXT("Delta Time: %f"), DeltaT);
 
 
