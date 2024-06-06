@@ -18,6 +18,8 @@
 
 #include "Engine/World.h" //world의 정보를 불러오기 위해 추가
 #include "GameFramework/Actor.h"
+#include "EngineUtils.h"
+
 //#include "Engine/Engine.h
 
 
@@ -102,11 +104,6 @@ void AMotionMatchingCharacter::BeginPlay()
 	SaveBasicRotators();
 	//Character skeleton의 기본 vector 값을 배열로 저장
 	SaveBasicVectors();
-
-
-	// Set obstacles
-	GetObstaclesinfo();
-
 
 	//MotionMatching BeginPlay
 	MotionMatchingMainBeginPlay();
@@ -440,14 +437,33 @@ void AMotionMatchingCharacter::GetObstaclesinfo()
 {
 	float scale = 100;
 
+
+	UWorld* World = GetWorld();
+
+
+
 	if (ActorClass)
 	{
-		UGameplayStatics::GetAllActorsOfClass(this, ActorClass, OutActors);
+		UGameplayStatics::GetAllActorsOfClass(World, ActorClass, OutActors);
 		UE_LOG(LogTemp, Log, TEXT("Number of Actors: %d"), OutActors.Num());
 
 		Obstacles_positions.resize(OutActors.Num());
 		Obstacles_scales.resize(OutActors.Num());
 	}
+
+
+
+	//UGameplayStatics::GetAllActorsOfClass(World, AActor::StaticClass(), OutActors);
+	//UGameplayStatics::GetAllActorsOfClass(this, ActorClass, OutActors);
+	//UE_LOG(LogTemp, Log, TEXT("Number of Actors: %d"), OutActors.Num());
+
+
+	//UGameplayStatics::GetAllActorsOfClass(World, , )
+
+
+	Obstacles_positions.resize(OutActors.Num());
+	Obstacles_scales.resize(OutActors.Num());
+
 
 
 	for (int i = 0; i < OutActors.Num(); i++)
@@ -1581,7 +1597,7 @@ quat AMotionMatchingCharacter::clamp_character_rotation(
 void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 
 	// Set obstacles
-	//GetObstaclesinfo();
+	GetObstaclesinfo();
 
 
 	// Character
@@ -2853,13 +2869,16 @@ void AMotionMatchingCharacter::InputLog()
 	//array1d<vec3> Obstacles_positions = array1d<vec3>(0);
 	//array1d<vec3> Obstacles_scales = array1d<vec3>(0);
 
-	UE_LOG(LogTemp, Log, TEXT("Num of Obstacles : %f"), Obstacles_positions.size);
+	UE_LOG(LogTemp, Log, TEXT("Num of Obstacles : %d"), Obstacles_positions.size);
 
-	//for (int i = 0; i < Obstacles_positions.size; i++) {
+	for (int i = 0; i < Obstacles_positions.size; i++) {
 
-	//	UE_LOG(LogTemp, Log, TEXT("Obstacle %i position: x: %f, y: %f, z: %f"), i, Obstacles_positions.data[i].x, Obstacles_positions.data[i].y, Obstacles_positions.data[i].z);
+		UE_LOG(LogTemp, Log, TEXT("Obstacle %i position: x: %f, y: %f, z: %f"), i, Obstacles_positions.data[i].x, Obstacles_positions.data[i].y, Obstacles_positions.data[i].z);
 
-	//}
+	}
+
+
+
 
 	//--------------------------------------
 	//Log Delta time

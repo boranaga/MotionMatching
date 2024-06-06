@@ -178,7 +178,7 @@ protected: //Motion Matching ฐüทร variables
 	UPROPERTY()
 	TArray<AActor*> OutActors;
 
-	//UPROPERTY(EditAnywhere, Category = "Obstacle")
+	UPROPERTY(EditAnywhere, Category = "Obstacle")
 	TSubclassOf<AActor> ActorClass;
 
 	array1d<vec3> Obstacles_positions = array1d<vec3>(0);
