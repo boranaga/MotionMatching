@@ -6,9 +6,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Controller.h"
+
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "MMPlayerController.h"
 #include "Math/Color.h"
@@ -16,58 +18,87 @@
 #include "Engine/StaticMeshActor.h"
 
 
+#include "Grabber.h"
+
+
+AJWCharacter::AJWCharacter()
+{
+	Grabber = CreateDefaultSubobject<UGrabber>(TEXT("Grabber"));
+	Grabber->SetupAttachment(RootComponent);
+}
+
+
+void AJWCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Started, this, &AJWCharacter::Grab);
+		EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Completed, this, &AJWCharacter::Release);
+	}
+	
+}
 
 void AJWCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetObstaclesinfo();
 }
 
 void AJWCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	for (int i = 0; i < Obstacles_positions.size; i++)
+}
+
+
+void AJWCharacter::Grab()
+{
+	if (Grabber)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Location : %f       %f        %f"), Obstacles_positions(i).x, Obstacles_positions(i).y, Obstacles_positions(i).z);
-		UE_LOG(LogTemp, Log, TEXT("Location : %f       %f        %f"), Obstacles_scales(i).x, Obstacles_scales(i).y, Obstacles_scales(i).z);
+		Grabber->Grab();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Grabber component not found"))
 	}
 }
 
-void AJWCharacter::GetObstaclesinfo()
-{
-
-	//if (ActorClass)
-	//{
-	//	UGameplayStatics::GetAllActorsOfClass(this, ActorClass, OutActors);
-	//	//UE_LOG(LogTemp, Log, TEXT("Number of Actors: %d"), OutActors.Num());
-
-	//	Obstacles_positions.resize(OutActors.Num());
-	//	Obstacles_scales.resize(OutActors.Num());
-	//}
-
-	//for (int i = 0; i < OutActors.Num(); i++)
-	//{
-	//	FVector ActorLocation = OutActors[i]->GetActorLocation() / 100;
-	//	FVector ActorScale = OutActors[i]->GetActorScale() / 100;
-	//	
-	//	Obstacles_positions(i) = vec3(ActorLocation.Z, -ActorLocation.X, ActorLocation.Y);
-	//	Obstacles_scales(i) = vec3(ActorScale.Z, -ActorScale.X, ActorScale.Y);
-
-	//	//UE_LOG(LogTemp, Log, TEXT("%f       %f        %f"), ActorScale.X, ActorScale.Y, ActorScale.Z);
-	//}
-}
+void AJWCharacter::Release()
+{	
+	if (Grabber)
+	{
+		Grabber->Release();
+	}
+}	
 
 
 
 
-
-
-
-
-
-
+//void AJWCharacter::GetObstaclesinfo()
+//{
+//
+//	//if (ActorClass)
+//	//{
+//	//	UGameplayStatics::GetAllActorsOfClass(this, ActorClass, OutActors);
+//	//	//UE_LOG(LogTemp, Log, TEXT("Number of Actors: %d"), OutActors.Num());
+//
+//	//	Obstacles_positions.resize(OutActors.Num());
+//	//	Obstacles_scales.resize(OutActors.Num());
+//	//}
+//
+//	//for (int i = 0; i < OutActors.Num(); i++)
+//	//{
+//	//	FVector ActorLocation = OutActors[i]->GetActorLocation() / 100;
+//	//	FVector ActorScale = OutActors[i]->GetActorScale() / 100;
+//	//	
+//	//	Obstacles_positions(i) = vec3(ActorLocation.Z, -ActorLocation.X, ActorLocation.Y);
+//	//	Obstacles_scales(i) = vec3(ActorScale.Z, -ActorScale.X, ActorScale.Y);
+//
+//	//	//UE_LOG(LogTemp, Log, TEXT("%f       %f        %f"), ActorScale.X, ActorScale.Y, ActorScale.Z);
+//	//}
+//}
 
 
 

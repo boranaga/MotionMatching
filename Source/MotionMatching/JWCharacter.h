@@ -4,29 +4,35 @@
 
 #include "CoreMinimal.h"
 #include "MotionMatchingCharacter.h"
-
-#include "MMcommon.h"
-#include "MMvec.h"
-#include "MMquat.h"
-#include "MMspring.h"
-#include "MMarray.h"
-#include "MMcharacter.h"
-#include "MMdatabase.h"
-#include "MMnnet.h"
-#include "MMlmm.h"
-
 #include "JWCharacter.generated.h"
 
 /**
  * 
  */
+class UInputAction;
+class UGrabber;
+struct FInputActionValue;
+
 UCLASS()
 class MOTIONMATCHING_API AJWCharacter : public AMotionMatchingCharacter
 {
 	GENERATED_BODY()
 
+public:
+
+	AJWCharacter();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Grabber, meta = (AllowPrivateAccess = "true"))
+	UGrabber* Grabber;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* GrabAction;
+
+	void Grab();
+	void Release();
+
 protected:
-	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// To add mapping context
 	virtual void BeginPlay();
@@ -37,13 +43,6 @@ protected:
 
 protected:
 
-	//UPROPERTY()
-	//TArray<AActor*> OutActors;
-	//
-	//UPROPERTY(EditAnywhere, Category = "Obstacle")
-	//TSubclassOf<AActor> ActorClass;
-
-	void GetObstaclesinfo();
 };
 
 
