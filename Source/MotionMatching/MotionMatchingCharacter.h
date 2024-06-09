@@ -168,6 +168,21 @@ protected: //Motion Matching 관련 variables
 	//스켈레톤의 기본 position(vector) 값 저장
 	TArray<FVector> BasicCharatorVector;
 
+	//Stamina 관련
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float TotalStamina = 300;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float CurrStamina = 300;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float Stamina_Ratio = 1;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool IsitRunning = false;
+
+
+
+
 	float Camera_azimuth = 0.0f;
 	float Camera_altitude = 0.4f * 100;
 	float Camera_distance = 4.0f * 100;
@@ -278,9 +293,9 @@ protected: //Motion Matching 관련 variables
 	float Simulation_run_side_speed = 3.0f * 2;
 	float Simulation_run_back_speed = 2.5f * 2;
 
-	float Simulation_walk_fwrd_speed = 1.75f * 2;
-	float Simulation_walk_side_speed = 1.5f * 2;
-	float Simulation_walk_back_speed = 1.25f * 2;
+	float Simulation_walk_fwrd_speed = 1.75f * 1;
+	float Simulation_walk_side_speed = 1.5f * 1;
+	float Simulation_walk_back_speed = 1.25f * 1;
 
 	//float Simulation_walk_fwrd_speed = 1.75f * 5;
 	//float Simulation_walk_side_speed = 1.5f * 5;
@@ -416,9 +431,11 @@ public: //Motion Matching 관련
 	void InputLog();
 	
 	//-------------------------------------------------------------------
+	//Set Stamina
+	void SetStamina();
+
 	//Get obstacles informations
 	void GetObstaclesinfo();
-
 
 	//Set Simulation object, Set Animation
 	void SetSimulationObj();

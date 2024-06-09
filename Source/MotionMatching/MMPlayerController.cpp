@@ -8,6 +8,7 @@ void AMMPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+    //Menu UI
     if (MenuWidgetClass)
     {
         MenuWidget = CreateWidget<UUserWidget>(GetWorld(), MenuWidgetClass);
@@ -17,6 +18,19 @@ void AMMPlayerController::BeginPlay()
             MenuWidget->SetVisibility(ESlateVisibility::Hidden);
         }
     }
+
+
+    //Stamina UI
+    if (StaminaWidgetClass)
+    {
+        StaminaWidget = CreateWidget<UUserWidget>(GetWorld(), StaminaWidgetClass);
+        if (StaminaWidget)
+        {
+            StaminaWidget->AddToViewport();
+            StaminaWidget->SetVisibility(ESlateVisibility::Visible);
+        }
+    }
+
 
 }
 

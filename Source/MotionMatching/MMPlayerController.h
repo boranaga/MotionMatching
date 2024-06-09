@@ -16,11 +16,20 @@ class MOTIONMATCHING_API AMMPlayerController : public APlayerController
 	
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	//Menu UI
+	UPROPERTY(EditDefaultsOnly, Category = "MenuUI")
 	TSubclassOf<class UUserWidget> MenuWidgetClass;
 
 	UPROPERTY()
 	class UUserWidget* MenuWidget;
+
+	//Stamina UI
+	//UPROPERTY(EditDefaultsOnly, Category = "StaminaUI")
+	UPROPERTY(EditAnywhere, Category = "StaminaUI")
+	TSubclassOf<class UUserWidget> StaminaWidgetClass;
+
+	UPROPERTY()
+	class UUserWidget* StaminaWidget;
 
 
 public:
