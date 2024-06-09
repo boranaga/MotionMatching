@@ -401,6 +401,8 @@ public: //Motion Matching 관련
 	UFUNCTION()
 	void MotionMatchingMainTick(); 
 
+	void SetInputZero();
+
 	UFUNCTION()
 	void SaveBasicRotators(); //캐릭터 스켈레톤의 기본 Rotator 값 저장
 
