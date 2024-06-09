@@ -136,6 +136,8 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 
 	DeltaT = DeltaTime; //DeltaT를 DeltaTime으로 초기화
 
+	SetInputZero(); //Input value 초기화
+
 	MotionMatchingMainTick();
 
 	//UI
@@ -469,6 +471,39 @@ void AMotionMatchingCharacter::GetObstaclesinfo()
 
 			Obstacles_scales(i) = vec3(ActualCubeSize.Y, ActualCubeSize.Z, ActualCubeSize.X); //좌표계 변환
 		}
+	}
+}
+
+//------------------------------------------------------
+void AMotionMatchingCharacter::SetInputZero() {
+
+	//좌측 조이스틱(이동) 키를 입력하지 않으면 입력값 초기화.
+	APlayerController* PlayerController = Cast<APlayerController>(Controller);
+	if (PlayerController)
+	{
+		if (!PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Down) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Up)
+			&& !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Left) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Right))
+		{
+			LeftStickValue2D = FVector2D(0, 0);
+		}
+		//else {
+		//	UE_LOG(LogTemp, Log, TEXT("LeftStick2D"));
+		//	UE_LOG(LogTemp, Log, TEXT("X: %f, Y: %f"), LeftStickValue2D.X, LeftStickValue2D.Y);
+		//}
+	}
+
+	//우측 조이스틱(룩) 키를 입력하지 않으면 입력값 초기화.
+	if (PlayerController)
+	{
+		if (!PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Down) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Up)
+			&& !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Left) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Right))
+		{
+			RightStickValue2D = FVector2D(0, 0);
+		}
+		//else {
+		//	UE_LOG(LogTemp, Log, TEXT("RightStick2D"));
+		//	UE_LOG(LogTemp, Log, TEXT("X: %f, Y: %f"), RightStickValue2D.X, RightStickValue2D.Y);
+		//}
 	}
 }
 
@@ -1565,7 +1600,7 @@ quat AMotionMatchingCharacter::clamp_character_rotation(
 void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 
 	// Set obstacles
-	GetObstaclesinfo();
+	//GetObstaclesinfo();
 
 
 	// Character
