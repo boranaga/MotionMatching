@@ -29,7 +29,6 @@ public:
 	UInputAction* GrabAction;
 
 	void Grab();
-	void Release();
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

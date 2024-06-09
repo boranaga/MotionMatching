@@ -26,7 +26,7 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "TriggerTag")
-	FName Tag = TEXT("unlock1");
+	FName Tag = TEXT("Parcel");
 
 	
 };

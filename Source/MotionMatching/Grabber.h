@@ -30,6 +30,10 @@ public:
 	void Grab();
 	void Release();
 
+
+	UPROPERTY()
+	bool bGrabbing = false;
+
 private:
 	UPROPERTY(EditAnywhere)
 	float MaxGrabDistance = 400;
@@ -39,4 +43,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float HoldDistance = 50;
+
+
 };
