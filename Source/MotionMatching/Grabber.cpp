@@ -54,7 +54,8 @@ void UGrabber::Grab()
 		return;
 	}
 	
-	
+	bGrabbing = true;
+
 	FVector Start = GetComponentLocation();
 	FVector End = Start + GetForwardVector() * MaxGrabDistance;
 
@@ -86,6 +87,8 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
+	bGrabbing = false;
+
 	UPhysicsHandleComponent* PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 	if (PhysicsHandle == nullptr)
 	{

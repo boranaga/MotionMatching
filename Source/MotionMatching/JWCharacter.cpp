@@ -35,7 +35,7 @@ void AJWCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Started, this, &AJWCharacter::Grab);
-		EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Completed, this, &AJWCharacter::Release);
+		//EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Completed, this, &AJWCharacter::Release);
 	}
 	
 }
@@ -57,7 +57,14 @@ void AJWCharacter::Grab()
 {
 	if (Grabber)
 	{
-		Grabber->Grab();
+		if(Grabber->bGrabbing == false)
+		{
+			Grabber->Grab();
+		}
+		else
+		{
+			Grabber->Release();
+		}
 	}
 	else
 	{
@@ -65,13 +72,13 @@ void AJWCharacter::Grab()
 	}
 }
 
-void AJWCharacter::Release()
-{	
-	if (Grabber)
-	{
-		Grabber->Release();
-	}
-}	
+//void AJWCharacter::Release()
+//{	
+//	if (Grabber)
+//	{
+//		Grabber->Release();
+//	}
+//}	
 
 
 
