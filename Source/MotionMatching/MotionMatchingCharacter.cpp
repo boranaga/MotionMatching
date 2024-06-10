@@ -2445,17 +2445,20 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 	SetCharacterAnimation();
 
 	//Draw matched features
-	array1d<float> current_features = LMM_enabled ? slice1d<float>(Features_curr) : DB.features(Frame_index);
-	denormalize_features(current_features, DB.features_offset, DB.features_scale);
-	Draw_features(current_features, Bone_positions(0), Bone_rotations(0), FColor::Blue);
+	//array1d<float> current_features = LMM_enabled ? slice1d<float>(Features_curr) : DB.features(Frame_index);
+	//denormalize_features(current_features, DB.features_offset, DB.features_scale);
+	//Draw_features(current_features, Bone_positions(0), Bone_rotations(0), FColor::Blue); //영상을 위해 껐음
 
 
 
 	//Draw traectory
-	Draw_trajectory(Trajectory_positions, Trajectory_rotations, FColor::Orange);
+	//Draw_trajectory(Trajectory_positions, Trajectory_rotations, FColor::Orange); //영상을 위해 껐음
 
 	//Draw simulation object
-	Draw_simulation_object(Simulation_position, Simulation_rotation, FColor::Orange);
+	//Draw_simulation_object(Simulation_position, Simulation_rotation, FColor::Orange); //영상을 위해 껐음
+
+
+	//---------------------------------------------------------------------
 
 	//// Draw Clamping Radius/Angles
 	//if (clamping_enabled)
@@ -2935,7 +2938,7 @@ void AMotionMatchingCharacter::InputLog()
 
 	//--------------------------------------
 	//Log Delta time
-	UE_LOG(LogTemp, Log, TEXT("Delta Time: %f"), DeltaT);
+	//UE_LOG(LogTemp, Log, TEXT("Delta Time: %f"), DeltaT);
 
 
 }
@@ -2947,6 +2950,9 @@ void AMotionMatchingCharacter::Grab()
 {
 	if (Grabber)
 	{
+		//UE_LOG(LogTemp, Log, TEXT("grab button triggerd"))
+
+
 		if (Grabber->bGrabbing == false)
 		{
 			Grabber->Grab();
@@ -2956,8 +2962,8 @@ void AMotionMatchingCharacter::Grab()
 			Grabber->Release();
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("Grabber component not found"))
-	}
+	//else
+	//{
+	//	//UE_LOG(LogTemp, Log, TEXT("Grabber component not found"))
+	//}
 }
