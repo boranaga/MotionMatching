@@ -2,6 +2,8 @@
 
 
 #include "GoalComponent.h"
+#include "Kismet/KismetMaterialLibrary.h"
+#include "Components/MeshComponent.h"
 
 UGoalComponent::UGoalComponent()
 {
@@ -17,15 +19,16 @@ void UGoalComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	TArray<AActor*> Actors;
-	GetOverlappingActors(Actors);
+	//TArray<AActor*> Actors;
+	//GetOverlappingActors(Actors);
 
-	for (AActor* Actor : Actors)
-	{
-		if (Actor->ActorHasTag(Tag))
-		{
-			UE_LOG(LogTemp, Log, TEXT("%s"), *Actor->GetName());
-		}
-	}
+	//for (AActor* Actor : Actors)
+	//{
+	//	if (Actor->ActorHasTag(Tag))
+	//	{
+	//		UE_LOG(LogTemp, Log, TEXT("%s"), *Actor->GetName());
+
+	//	}
+	//}
 
 }	

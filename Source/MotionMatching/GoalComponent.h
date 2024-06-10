@@ -17,6 +17,11 @@ class MOTIONMATCHING_API UGoalComponent : public UBoxComponent
 public:
 	UGoalComponent();
 
+
+	//UFUNCTION(BlueprintImplementableEvent)
+	//void MYFunc();
+
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -25,8 +30,8 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "TriggerTag")
-	FName Tag = TEXT("Parcel");
+	//UPROPERTY(EditAnywhere, Category = "TriggerTag")
+	//FName Tag = TEXT("Parcel");
 
 	
 };
