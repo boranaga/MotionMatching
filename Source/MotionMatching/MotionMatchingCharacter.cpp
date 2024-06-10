@@ -507,6 +507,34 @@ void AMotionMatchingCharacter::SetInputZero() {
 	}
 }
 
+//------------------------------------------------------
+void AMotionMatchingCharacter::SetStamina() {
+
+	IsitRunning = false;
+
+	float exhaustion_rate = 1;
+	float increasing_rate = 2;
+
+	if (GaitButton && CurrStamina != 0) {
+		CurrStamina -= exhaustion_rate;
+		IsitRunning = true;
+	}
+
+	else if (!GaitButton && CurrStamina < TotalStamina) {
+		CurrStamina += increasing_rate;
+	}
+
+	if (CurrStamina < 0) {
+		CurrStamina = 0;
+		IsitRunning = false;
+	}
+	else if (CurrStamina > TotalStamina) {
+		CurrStamina = TotalStamina;
+	}
+
+	Stamina_Ratio = CurrStamina / TotalStamina;
+
+}
 
 
 //------------------------------------------------------
@@ -675,7 +703,9 @@ void AMotionMatchingCharacter::desired_gait_update(
 	simple_spring_damper_exact( //MMspring.h에서 구현
 		desired_gait,
 		desired_gait_velocity,
-		GaitButton ? 1.0f : 0.0f,
+		//GaitButton ? 1.0f : 0.0f,
+		//GaitButton ? 0.0f : 1.0f, //버튼을 누르면 run 상태임
+		IsitRunning ? 0.0f : 1.0f,
 		gait_change_halflife,
 		dt);
 }
@@ -1600,7 +1630,7 @@ quat AMotionMatchingCharacter::clamp_character_rotation(
 void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 
 	// Set obstacles
-	//GetObstaclesinfo();
+	GetObstaclesinfo();
 
 
 	// Character
@@ -1782,6 +1812,9 @@ void AMotionMatchingCharacter::MotionMatchingMainBeginPlay() {
 }
 
 void AMotionMatchingCharacter::MotionMatchingMainTick() {
+
+	//Set Stamina
+	SetStamina(); //Walk or Run state를 결정함
 
 
 	// Get gamepad stick states
