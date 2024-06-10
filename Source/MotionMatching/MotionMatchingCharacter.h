@@ -25,6 +25,8 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+class UGrabber;
+
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
@@ -74,6 +76,10 @@ class AMotionMatchingCharacter : public ACharacter
 	/** Menu Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MenuAction;
+
+	/** Grab Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* GrabAction;
 
 
 public:
@@ -757,4 +763,16 @@ public:
 	void SetCharacterRotationRest(); //캐릭터의 rotation을 bone_rest_rotations으로 설정
 
 
+
+
+//grab 관련 (나중에 제대로 정리해야함)
+public:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Grabber, meta = (AllowPrivateAccess = "true"))
+	UGrabber* Grabber;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	//UInputAction* GrabAction;
+
+	void Grab();
 };

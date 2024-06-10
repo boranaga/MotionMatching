@@ -23,8 +23,8 @@
 
 AJWCharacter::AJWCharacter()
 {
-	Grabber = CreateDefaultSubobject<UGrabber>(TEXT("Grabber"));
-	Grabber->SetupAttachment(RootComponent);
+	//Grabber = CreateDefaultSubobject<UGrabber>(TEXT("Grabber"));
+	//Grabber->SetupAttachment(RootComponent);
 }
 
 
@@ -34,7 +34,7 @@ void AJWCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Started, this, &AJWCharacter::Grab);
+		//EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Started, this, &AJWCharacter::Grab);
 		//EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Completed, this, &AJWCharacter::Release);
 	}
 	
@@ -53,24 +53,24 @@ void AJWCharacter::Tick(float DeltaTime)
 }
 
 
-void AJWCharacter::Grab()
-{
-	if (Grabber)
-	{
-		if(Grabber->bGrabbing == false)
-		{
-			Grabber->Grab();
-		}
-		else
-		{
-			Grabber->Release();
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("Grabber component not found"))
-	}
-}
+//void AJWCharacter::Grab()
+//{
+//	if (Grabber)
+//	{
+//		if(Grabber->bGrabbing == false)
+//		{
+//			Grabber->Grab();
+//		}
+//		else
+//		{
+//			Grabber->Release();
+//		}
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Log, TEXT("Grabber component not found"))
+//	}
+//}
 
 //void AJWCharacter::Release()
 //{	

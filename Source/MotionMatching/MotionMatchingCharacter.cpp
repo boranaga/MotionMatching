@@ -21,6 +21,8 @@
 #include "EngineUtils.h"
 
 
+#include "Grabber.h" //Grab
+
 #include "Components/PoseableMeshComponent.h"
 
 
@@ -68,6 +70,14 @@ AMotionMatchingCharacter::AMotionMatchingCharacter()
 	//PoseableMesh를 생성하고 RootComponent에 종속 시킴.
 	PoseableMesh = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("PoseableMesh"));
 	//PoseableMesh->SetupAttachment(RootComponent);
+
+
+
+	//Grab
+	Grabber = CreateDefaultSubobject<UGrabber>(TEXT("Grabber"));
+	Grabber->SetupAttachment(RootComponent);
+
+
 
 
 
@@ -216,6 +226,9 @@ void AMotionMatchingCharacter::SetupPlayerInputComponent(UInputComponent* Player
 
 		// MenuUI
 		EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::TapKeyDown);
+
+		//Grab
+		EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Started, this, &AMotionMatchingCharacter::Grab);
 
 	}
 	else
@@ -2925,4 +2938,26 @@ void AMotionMatchingCharacter::InputLog()
 	UE_LOG(LogTemp, Log, TEXT("Delta Time: %f"), DeltaT);
 
 
+}
+
+
+
+
+void AMotionMatchingCharacter::Grab()
+{
+	if (Grabber)
+	{
+		if (Grabber->bGrabbing == false)
+		{
+			Grabber->Grab();
+		}
+		else
+		{
+			Grabber->Release();
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Grabber component not found"))
+	}
 }
