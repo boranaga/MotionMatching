@@ -526,7 +526,7 @@ void AMotionMatchingCharacter::SetStamina() {
 	IsitRunning = false;
 
 	float exhaustion_rate = 1;
-	float increasing_rate = 2;
+	float increasing_rate = 5;
 
 	if (GaitButton && CurrStamina != 0) {
 		CurrStamina -= exhaustion_rate;
@@ -2445,17 +2445,17 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 	SetCharacterAnimation();
 
 	//Draw matched features
-	//array1d<float> current_features = LMM_enabled ? slice1d<float>(Features_curr) : DB.features(Frame_index);
-	//denormalize_features(current_features, DB.features_offset, DB.features_scale);
-	//Draw_features(current_features, Bone_positions(0), Bone_rotations(0), FColor::Blue); //영상을 위해 껐음
+	array1d<float> current_features = LMM_enabled ? slice1d<float>(Features_curr) : DB.features(Frame_index);
+	denormalize_features(current_features, DB.features_offset, DB.features_scale);
+	Draw_features(current_features, Bone_positions(0), Bone_rotations(0), FColor::Blue); //
 
 
 
 	//Draw traectory
-	//Draw_trajectory(Trajectory_positions, Trajectory_rotations, FColor::Orange); //영상을 위해 껐음
+	Draw_trajectory(Trajectory_positions, Trajectory_rotations, FColor::Orange); //
 
 	//Draw simulation object
-	//Draw_simulation_object(Simulation_position, Simulation_rotation, FColor::Orange); //영상을 위해 껐음
+	Draw_simulation_object(Simulation_position, Simulation_rotation, FColor::Orange); //
 
 
 	//---------------------------------------------------------------------

@@ -178,9 +178,9 @@ protected: //Motion Matching 관련 variables
 
 	//Stamina 관련
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	float TotalStamina = 600;
+	float TotalStamina = 1000;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	float CurrStamina = 600;
+	float CurrStamina = 1000;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float Stamina_Ratio = 1;
@@ -297,13 +297,13 @@ protected: //Motion Matching 관련 variables
 	//float Simulation_walk_side_speed = 1.5f;
 	//float Simulation_walk_back_speed = 1.25f;
 	// 
-	float Simulation_run_fwrd_speed = 4.0f * 2;
-	float Simulation_run_side_speed = 3.0f * 2;
-	float Simulation_run_back_speed = 2.5f * 2;
+	float Simulation_run_fwrd_speed = 4.0f * 1.5;
+	float Simulation_run_side_speed = 3.0f * 1.5;
+	float Simulation_run_back_speed = 2.5f * 1.5;
 
-	float Simulation_walk_fwrd_speed = 1.75f * 1.5f;
-	float Simulation_walk_side_speed = 1.5f * 1.5f;
-	float Simulation_walk_back_speed = 1.25f * 1.5f;
+	float Simulation_walk_fwrd_speed = 1.75f * 1.0f;
+	float Simulation_walk_side_speed = 1.5f * 1.0f;
+	float Simulation_walk_back_speed = 1.25f * 1.0f;
 
 	//float Simulation_walk_fwrd_speed = 1.75f * 5;
 	//float Simulation_walk_side_speed = 1.5f * 5;
