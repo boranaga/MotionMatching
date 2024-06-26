@@ -142,7 +142,7 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 	}
 	//-------------------------------------------------------------
 	//Input이 잘 작동하는지 테스트
-	InputLog();
+	//InputLog();
 
 	DeltaT = DeltaTime; //DeltaT를 DeltaTime으로 초기화
 
