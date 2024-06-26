@@ -142,7 +142,7 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 	}
 	//-------------------------------------------------------------
 	//Input이 잘 작동하는지 테스트
-	//InputLog();
+	InputLog();
 
 	DeltaT = DeltaTime; //DeltaT를 DeltaTime으로 초기화
 
@@ -2783,162 +2783,162 @@ void AMotionMatchingCharacter::PoseTestByPostion(int frameindex) {
 //Input Log Test
 void AMotionMatchingCharacter::InputLog() 
 {
-	//if (Controller != nullptr)
-	//{
-	//	// find out which way is forward
-	//	const FRotator Rotation = Controller->GetControlRotation();
-	//	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	if (Controller != nullptr)
+	{
+		// find out which way is forward
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-	//	// get forward vector
-	//	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		// get forward vector
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-	//	// get right vector 
-	//	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-
-	//	UE_LOG(LogTemp, Log, TEXT("ForwardDirection: "));
-	//	UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), ForwardDirection.X, ForwardDirection.Y, ForwardDirection.Z);
-
-	//	UE_LOG(LogTemp, Log, TEXT("RightDirection: "));
-	//	UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), RightDirection.X, RightDirection.Y, RightDirection.Z);
-	//}
-
-	////-------------------------------------------
-	////키보드 입력 부분
-
-	////Add Input Mapping Context
-	//if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
-	//{
-	//	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-	//	{
-	//		Subsystem->AddMappingContext(DefaultMappingContext, 0);
-	//	}
-
-	//	if (PlayerController->IsInputKeyDown(EKeys::A)) {
-	//		UE_LOG(LogTemp, Log, TEXT("A is pressed"));
-	//	}
-	//	if (PlayerController->IsInputKeyDown(EKeys::S)) {
-	//		UE_LOG(LogTemp, Log, TEXT("S is pressed"));
-	//	}
-	//	if (PlayerController->IsInputKeyDown(EKeys::D)) {
-	//		UE_LOG(LogTemp, Log, TEXT("D is pressed"));
-	//	}
-	//	if (PlayerController->IsInputKeyDown(EKeys::W)) {
-	//		UE_LOG(LogTemp, Log, TEXT("W is pressed"));
-	//	}
-	//}
-
-	////-------------------------------------------
-	//// Strafe 동작 테스트
-	//if (Desired_strafe == true)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Strafe ON!!"));
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Strafe OFF!!"));
-	//}
+		// get right vector 
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 
-	////-------------------------------------------
+		UE_LOG(LogTemp, Log, TEXT("ForwardDirection: "));
+		UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), ForwardDirection.X, ForwardDirection.Y, ForwardDirection.Z);
 
-	////좌측 조이스틱(이동) 키를 입력하지 않으면 입력값 초기화.
-	//APlayerController* PlayerController = Cast<APlayerController>(Controller);
-	//if (PlayerController)
-	//{
-	//	if (!PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Down) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Up)
-	//		&& !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Left) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Right))
-	//	{
-	//		LeftStickValue2D = FVector2D(0, 0);
-	//	}
-	//	else {
-	//		UE_LOG(LogTemp, Log, TEXT("LeftStick2D"));
-	//		UE_LOG(LogTemp, Log, TEXT("X: %f, Y: %f"), LeftStickValue2D.X, LeftStickValue2D.Y);
-	//	}
-	//}
+		UE_LOG(LogTemp, Log, TEXT("RightDirection: "));
+		UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), RightDirection.X, RightDirection.Y, RightDirection.Z);
+	}
 
-	////우측 조이스틱(룩) 키를 입력하지 않으면 입력값 초기화.
-	//if (PlayerController)
-	//{
-	//	if (!PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Down) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Up)
-	//		&& !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Left) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Right))
-	//	{
-	//		RightStickValue2D = FVector2D(0, 0);
-	//	}
-	//	else {
-	//		UE_LOG(LogTemp, Log, TEXT("RightStick2D"));
-	//		UE_LOG(LogTemp, Log, TEXT("X: %f, Y: %f"), RightStickValue2D.X, RightStickValue2D.Y);
-	//	}
-	//}
+	//-------------------------------------------
+	//키보드 입력 부분
 
+	//Add Input Mapping Context
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
 
+		if (PlayerController->IsInputKeyDown(EKeys::A)) {
+			UE_LOG(LogTemp, Log, TEXT("A is pressed"));
+		}
+		if (PlayerController->IsInputKeyDown(EKeys::S)) {
+			UE_LOG(LogTemp, Log, TEXT("S is pressed"));
+		}
+		if (PlayerController->IsInputKeyDown(EKeys::D)) {
+			UE_LOG(LogTemp, Log, TEXT("D is pressed"));
+		}
+		if (PlayerController->IsInputKeyDown(EKeys::W)) {
+			UE_LOG(LogTemp, Log, TEXT("W is pressed"));
+		}
+	}
 
-	////캐릭터의 월드 위치
-	//FVector CharacterWorldPos = GetActorLocation();
-	//UE_LOG(LogTemp, Log, TEXT("Character World Location: "));
-	//UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), CharacterWorldPos.X, CharacterWorldPos.Y, CharacterWorldPos.Z);
-
-	////카메라의 월드 위치
-	//FVector CamWorldPos = FollowCamera->GetComponentLocation();
-	//UE_LOG(LogTemp, Log, TEXT("Cam World Location: "));
-	//UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), CamWorldPos.X, CamWorldPos.Y, CamWorldPos.Z);
-
-
-	////-------------------------------------------
-	////Zoom input 테스트
-	//if (CamZoomIn == true)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Cam Zoom In"));
-	//}
-	//else
-	//{
-	//	;
-	//}
-
-	//if (CamZoomOut == true)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Cam Zoom Out"));
-	//}
-	//else
-	//{
-	//	;
-	//}
-
-	////-------------------------------------------
-	////Gait input 테스트
-	//if (GaitButton == true)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Gait button on"));
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Gait button off"));
-	//}
+	//-------------------------------------------
+	// Strafe 동작 테스트
+	if (Desired_strafe == true)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Strafe ON!!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Strafe OFF!!"));
+	}
 
 
-	////-----------------------------------
-	////Obstacle이 저장되었는지 확인
-	////array1d<vec3> Obstacles_positions = array1d<vec3>(0);
-	////array1d<vec3> Obstacles_scales = array1d<vec3>(0);
+	//-------------------------------------------
 
-	//UE_LOG(LogTemp, Log, TEXT("Num of Obstacles : %d"), Obstacles_positions.size);
+	//좌측 조이스틱(이동) 키를 입력하지 않으면 입력값 초기화.
+	APlayerController* PlayerController = Cast<APlayerController>(Controller);
+	if (PlayerController)
+	{
+		if (!PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Down) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Up)
+			&& !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Left) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_LeftStick_Right))
+		{
+			LeftStickValue2D = FVector2D(0, 0);
+		}
+		else {
+			UE_LOG(LogTemp, Log, TEXT("LeftStick2D"));
+			UE_LOG(LogTemp, Log, TEXT("X: %f, Y: %f"), LeftStickValue2D.X, LeftStickValue2D.Y);
+		}
+	}
 
-	//for (int i = 0; i < Obstacles_positions.size; i++) {
+	//우측 조이스틱(룩) 키를 입력하지 않으면 입력값 초기화.
+	if (PlayerController)
+	{
+		if (!PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Down) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Up)
+			&& !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Left) && !PlayerController->IsInputKeyDown(EKeys::Gamepad_RightStick_Right))
+		{
+			RightStickValue2D = FVector2D(0, 0);
+		}
+		else {
+			UE_LOG(LogTemp, Log, TEXT("RightStick2D"));
+			UE_LOG(LogTemp, Log, TEXT("X: %f, Y: %f"), RightStickValue2D.X, RightStickValue2D.Y);
+		}
+	}
 
-	//	UE_LOG(LogTemp, Log, TEXT("Obstacle %i position: x: %f, y: %f, z: %f"), i, Obstacles_positions.data[i].x, Obstacles_positions.data[i].y, Obstacles_positions.data[i].z);
 
-	//}
 
-	//for (int i = 0; i < Obstacles_scales.size; i++) {
+	//캐릭터의 월드 위치
+	FVector CharacterWorldPos = GetActorLocation();
+	UE_LOG(LogTemp, Log, TEXT("Character World Location: "));
+	UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), CharacterWorldPos.X, CharacterWorldPos.Y, CharacterWorldPos.Z);
 
-	//	UE_LOG(LogTemp, Log, TEXT("Obstacle %i scale: x: %f, y: %f, z: %f"), i, Obstacles_scales.data[i].x, Obstacles_scales.data[i].y, Obstacles_scales.data[i].z);
+	//카메라의 월드 위치
+	FVector CamWorldPos = FollowCamera->GetComponentLocation();
+	UE_LOG(LogTemp, Log, TEXT("Cam World Location: "));
+	UE_LOG(LogTemp, Log, TEXT("x: %f, y: %f, z: %f"), CamWorldPos.X, CamWorldPos.Y, CamWorldPos.Z);
 
-	//}
+
+	//-------------------------------------------
+	//Zoom input 테스트
+	if (CamZoomIn == true)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Cam Zoom In"));
+	}
+	else
+	{
+		;
+	}
+
+	if (CamZoomOut == true)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Cam Zoom Out"));
+	}
+	else
+	{
+		;
+	}
+
+	//-------------------------------------------
+	//Gait input 테스트
+	if (GaitButton == true)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Gait button on"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Gait button off"));
+	}
+
+
+	//-----------------------------------
+	//Obstacle이 저장되었는지 확인
+	//array1d<vec3> Obstacles_positions = array1d<vec3>(0);
+	//array1d<vec3> Obstacles_scales = array1d<vec3>(0);
+
+	UE_LOG(LogTemp, Log, TEXT("Num of Obstacles : %d"), Obstacles_positions.size);
+
+	for (int i = 0; i < Obstacles_positions.size; i++) {
+
+		UE_LOG(LogTemp, Log, TEXT("Obstacle %i position: x: %f, y: %f, z: %f"), i, Obstacles_positions.data[i].x, Obstacles_positions.data[i].y, Obstacles_positions.data[i].z);
+
+	}
+
+	for (int i = 0; i < Obstacles_scales.size; i++) {
+
+		UE_LOG(LogTemp, Log, TEXT("Obstacle %i scale: x: %f, y: %f, z: %f"), i, Obstacles_scales.data[i].x, Obstacles_scales.data[i].y, Obstacles_scales.data[i].z);
+
+	}
 
 
 	//--------------------------------------
 	//Log Delta time
-	//UE_LOG(LogTemp, Log, TEXT("Delta Time: %f"), DeltaT);
+	UE_LOG(LogTemp, Log, TEXT("Delta Time: %f"), DeltaT);
 
 
 }

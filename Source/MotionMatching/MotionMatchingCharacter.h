@@ -297,9 +297,9 @@ protected: //Motion Matching 관련 variables
 	//float Simulation_walk_side_speed = 1.5f;
 	//float Simulation_walk_back_speed = 1.25f;
 	// 
-	float Simulation_run_fwrd_speed = 4.0f * 1.5;
-	float Simulation_run_side_speed = 3.0f * 1.5;
-	float Simulation_run_back_speed = 2.5f * 1.5;
+	//float Simulation_run_fwrd_speed = 4.0f * 1.5;
+	//float Simulation_run_side_speed = 3.0f * 1.5;
+	//float Simulation_run_back_speed = 2.5f * 1.5;
 
 	float Simulation_walk_fwrd_speed = 1.75f * 1.0f;
 	float Simulation_walk_side_speed = 1.5f * 1.0f;
@@ -308,6 +308,11 @@ protected: //Motion Matching 관련 variables
 	//float Simulation_walk_fwrd_speed = 1.75f * 5;
 	//float Simulation_walk_side_speed = 1.5f * 5;
 	//float Simulation_walk_back_speed = 1.25f * 5;
+
+	//니카 모드
+	float Simulation_run_fwrd_speed = 4.0f * 15;
+	float Simulation_run_side_speed = 3.0f * 15;
+	float Simulation_run_back_speed = 2.5f * 15;
 
 
 
