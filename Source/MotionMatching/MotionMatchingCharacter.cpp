@@ -132,14 +132,14 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 	//-------------------------------------------------------------
 	//Tick 함수가 잘 작동하는지 테스트
 	//초 단위로 출력
-	TickTime += DeltaTime;
-	if (TickTime >= 3) {
-		//UE_LOG(LogTemp, Log, TEXT("%d Seconds has passed."), TimePassed);
-		//TimePassed += 1;
-		TickTime = 0.0f;
+	//TickTime += DeltaTime;
+	//if (TickTime >= 3) {
+	//	//UE_LOG(LogTemp, Log, TEXT("%d Seconds has passed."), TimePassed);
+	//	//TimePassed += 1;
+	//	TickTime = 0.0f;
 
-		InputLog();
-	}
+	//	InputLog();
+	//}
 	//-------------------------------------------------------------
 	//Input이 잘 작동하는지 테스트
 	//InputLog();
@@ -150,42 +150,15 @@ void AMotionMatchingCharacter::Tick(float DeltaTime) {
 
 	MotionMatchingMainTick();
 
-	//UI
-	//if (LMM_enabled)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("LMM ON"));
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("LMM OFF"));
-	//}
+	//일정 프레임 단위로 애니메이션 변화 및 출력
+	TickSum += DeltaTime;
+	if (TickSum >= StickedFrame) { //&& animtestbool
+		TickSum = 0;
 
-	//if (Ik_enabled)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Ik_enabled ON"));
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Ik_enabled OFF"));
-	//}
+		//SetCharacterAnimation();
 
-	//if (Adjustment_enabled)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Adjustment_enabled ON"));
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Adjustment_enabled OFF"));
-	//}
-
-	//if (Clamping_enabled)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Clamping_enabled ON"));
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Clamping_enabled OFF"));
-	//}
+		SetUECharacterAnimation();
+	}
 
 }
 
@@ -441,6 +414,73 @@ void AMotionMatchingCharacter::SetCharacterAnimation() {
 
 
 }
+
+
+void AMotionMatchingCharacter::SetUECharacterAnimation() {
+
+	//관절의 개수
+	int JointsNum = JointsNames.Num();
+
+
+	//-------------------------------------------------------------------------------
+	//<Set Rotation>
+
+
+	array1d<quat> bone_rotations = Global_bone_rotations;
+	TArray<FQuat> JointsQuat;
+
+
+	//JointsQuat.Emplace(FQuat(bone_rotations.data[0].z * (1), bone_rotations.data[0].x * (-1), bone_rotations.data[0].y * (1), bone_rotations.data[0].w));
+	JointsQuat.Emplace(FQuat(bone_rotations.data[0].y * (1), bone_rotations.data[0].x * (1), bone_rotations.data[0].z * (-1), bone_rotations.data[0].w * (1)));
+
+	for (int i = 1; i < JointsNum; i++) {
+		//언리얼에 맞게 좌표계를 변환해줌
+		JointsQuat.Emplace(FQuat(bone_rotations.data[i].y * (1), bone_rotations.data[i].x * (1), bone_rotations.data[i].z * (-1), bone_rotations.data[i].w));
+		//JointsQuat.Emplace(FQuat(bone_rotations.data[i].z * (1), bone_rotations.data[i].x * (-1), bone_rotations.data[i].y * (1), bone_rotations.data[i].w));
+	}
+
+	//Set pose
+	FQuat StandQuat(0, 1, 0, 90);
+	////GetMesh()->SetBoneRotationByName(FName(JointsNames[0]), JointsQuat[0].Rotator(), EBoneSpaces::WorldSpace);
+	GetMesh()->SetBoneRotationByName(FName(UEJointsNames[0]), JointsQuat[0].Rotator(), EBoneSpaces::ComponentSpace);
+
+	for (int i = 1; i < JointsNum; i++) {
+		FRotator Rotation = JointsQuat[i].Rotator();
+		GetMesh()->SetBoneRotationByName(FName(UEJointsNames[i]), Rotation, EBoneSpaces::ComponentSpace);
+		//GetMesh()->SetBoneRotationByName(FName(JointsNames[i]), Rotation, EBoneSpaces::WorldSpace);
+	}
+
+	//Mesh를 world y축을 기준으로 90도 회전시켜서 세움
+	////GetMesh()->SetBoneRotationByName(FName(JointsNames[1]), GetMesh()->GetBoneRotationByName(FName(JointsNames[1]), EBoneSpaces::ComponentSpace) + StandQuat.Rotator(), EBoneSpaces::ComponentSpace);
+
+	////GetMesh()->SetBoneRotationByName(FName(JointsNames[0]), GetMesh()->GetBoneRotationByName(FName(JointsNames[0]), EBoneSpaces::WorldSpace) + StandQuat.Rotator(), EBoneSpaces::WorldSpace);
+	GetMesh()->SetBoneRotationByName(FName(UEJointsNames[0]), GetMesh()->GetBoneRotationByName(FName(UEJointsNames[0]), EBoneSpaces::ComponentSpace) + StandQuat.Rotator(), EBoneSpaces::ComponentSpace);
+
+
+	//-------------------------------------------------------------------------------
+	//<Set Position>
+	array1d<vec3> bone_positions = Global_bone_positions;
+	TArray<FVector> JointsVec;
+
+	int scale = 100;
+
+	for (int i = 0; i < JointsNum; i++) {
+		JointsVec.Emplace(FVector(bone_positions.data[i].z * scale, bone_positions.data[i].x * (-1) * scale, bone_positions.data[i].y * scale));
+		//JointsVec.Emplace(FVector(bone_positions.data[i].z * scale, bone_positions.data[i].x * (1) * scale, bone_positions.data[i].y * scale));
+	}
+
+	//Set Pose
+	FVector offset(0, 0, 90);
+	GetMesh()->SetBoneLocationByName(FName(UEJointsNames[0]), JointsVec[0] + offset, EBoneSpaces::WorldSpace);
+
+	//for (int i = 1; i < JointsNum; i++) {
+	//	//FVector Position = JointsVector[i] + BasicCharatorVector[i]; //basic에 position 더한 값
+	//	FVector Position = JointsVector[i];
+	//	GetMesh()->SetBoneLocationByName(FName(JointsNames[i]), Position, EBoneSpaces::ComponentSpace);
+	//}
+
+}
+
 
 
 //-----------------------------------------------------
@@ -2442,20 +2482,23 @@ void AMotionMatchingCharacter::MotionMatchingMainTick() {
 	
 	// Render
 	SetSimulationObj();
-	SetCharacterAnimation();
+	//SetCharacterAnimation();
 
-	//Draw matched features
-	array1d<float> current_features = LMM_enabled ? slice1d<float>(Features_curr) : DB.features(Frame_index);
-	denormalize_features(current_features, DB.features_offset, DB.features_scale);
-	Draw_features(current_features, Bone_positions(0), Bone_rotations(0), FColor::Blue); //
+	
 
 
+	////Draw matched features
+	//array1d<float> current_features = LMM_enabled ? slice1d<float>(Features_curr) : DB.features(Frame_index);
+	//denormalize_features(current_features, DB.features_offset, DB.features_scale);
+	//Draw_features(current_features, Bone_positions(0), Bone_rotations(0), FColor::Blue); //
 
-	//Draw traectory
-	Draw_trajectory(Trajectory_positions, Trajectory_rotations, FColor::Orange); //
 
-	//Draw simulation object
-	Draw_simulation_object(Simulation_position, Simulation_rotation, FColor::Orange); //
+
+	////Draw traectory
+	//Draw_trajectory(Trajectory_positions, Trajectory_rotations, FColor::Orange); //
+
+	////Draw simulation object
+	//Draw_simulation_object(Simulation_position, Simulation_rotation, FColor::Orange); //
 
 
 	//---------------------------------------------------------------------

@@ -133,6 +133,12 @@ protected:
 	float TickTime;
 	int TimePassed;
 
+	//모션 매칭 애니메이션 리셋을 일정 프레임 단위로 작동시키기 위한 코드
+	float TickSum = 0;
+	float StickedFrame = 1 / 60;
+	float animtestbool = true;
+
+
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -169,6 +175,36 @@ protected: //Motion Matching 관련 variables
 		TEXT("RightForeArm"),
 		TEXT("RightHand")
 	};
+
+
+	//스켈레톤의 각 Joint 이름을 저장한 배열
+	//unreal engine의 skeleton 버전
+	const TArray<FString> UEJointsNames = {
+		TEXT("root"),
+		TEXT("pelvis"),
+		TEXT("thigh_l"),
+		TEXT("calf_l"),
+		TEXT("foot_l"),
+		TEXT("ball_l"),
+		TEXT("thigh_r"),
+		TEXT("calf_r"),
+		TEXT("foot_r"),
+		TEXT("ball_r"),
+		TEXT("spine_02"),
+		TEXT("spine_03"),
+		TEXT("spine_04"),
+		TEXT("neck_01"),
+		TEXT("head"),
+		TEXT("clavicle_l"),
+		TEXT("upperarm_l"),
+		TEXT("lowerarm_l"),
+		TEXT("hand_l"),
+		TEXT("clavicle_r"),
+		TEXT("upperarm_r"),
+		TEXT("lowerarm_r"),
+		TEXT("hand_r")
+	};
+
 
 
 	//스켈레톤의 기본 rotator 값 저장
@@ -297,9 +333,9 @@ protected: //Motion Matching 관련 variables
 	//float Simulation_walk_side_speed = 1.5f;
 	//float Simulation_walk_back_speed = 1.25f;
 	// 
-	//float Simulation_run_fwrd_speed = 4.0f * 1.5;
-	//float Simulation_run_side_speed = 3.0f * 1.5;
-	//float Simulation_run_back_speed = 2.5f * 1.5;
+	float Simulation_run_fwrd_speed = 4.0f * 1.5;
+	float Simulation_run_side_speed = 3.0f * 1.5;
+	float Simulation_run_back_speed = 2.5f * 1.5;
 
 	float Simulation_walk_fwrd_speed = 1.75f * 1.0f;
 	float Simulation_walk_side_speed = 1.5f * 1.0f;
@@ -308,12 +344,6 @@ protected: //Motion Matching 관련 variables
 	//float Simulation_walk_fwrd_speed = 1.75f * 5;
 	//float Simulation_walk_side_speed = 1.5f * 5;
 	//float Simulation_walk_back_speed = 1.25f * 5;
-
-	//니카 모드
-	float Simulation_run_fwrd_speed = 4.0f * 15;
-	float Simulation_run_side_speed = 3.0f * 15;
-	float Simulation_run_back_speed = 2.5f * 15;
-
 
 
 	array1d<vec3> Trajectory_desired_velocities = array1d<vec3>(4);
@@ -382,7 +412,7 @@ protected: //Motion Matching 관련 variables
 	array1d<float> Latent_curr = array1d<float>(32);
 
 	//DeltTime(FrameRate)
-	//float DeltaT = 1.0f / 60.0f; //dt
+	//float DeltaT = 1.0f / 30.0f; //dt
 	float DeltaT = 1.0f / 60.0f; //dt
 
 
@@ -453,6 +483,7 @@ public: //Motion Matching 관련
 	//Set Simulation object, Set Animation
 	void SetSimulationObj();
 	void SetCharacterAnimation();
+	void SetUECharacterAnimation();
 
 	//Draw Debug spheres
 	FVector To_Vector3(vec3 v);
